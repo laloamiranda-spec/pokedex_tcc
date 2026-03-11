@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>POKEDEX · TCC</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root {
+  --sage:#8aab8e;--sage-light:#c4d9c6;--sage-pale:#eef4ef;
+  --clay:#c4826b;--clay-light:#f0d5cc;
+  --ink:#2c2c2c;--mist:#f7f5f2;--warm-white:#fdfcfa;
+  --stone:#9e9890;--stone-light:#e8e5e0;
+  --lavender:#9b8ec4;--lavender-light:#e4dfef;--lavender-pale:#f3f1fa;
+  --amber:#c9a65a;--amber-light:#f5ecd4;
+  --teal:#5b9fa8;--teal-light:#d0eaed;--teal-pale:#eaf5f7;
+  --gold:#b8960c;--gold-light:#fdf3c0;--gold-pale:#fffde8;
+  --font-display:'DM Serif Display',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --radius:16px;--radius-sm:10px;
+  --shadow:0 4px 24px rgba(44,44,44,0.07);
+  --shadow-lg:0 12px 48px rgba(44,44,44,0.12);
+  --header-h:56px;--bottom-nav-h:64px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{font-family:var(--font-body);background:var(--mist);color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(ellipse at 20% 0%,rgba(138,171,142,0.12) 0%,transparent 60%),
+  radial-gradient(ellipse at 80% 100%,rgba(155,142,196,0.1) 0%,transparent 60%);
+  padding-bottom:var(--bottom-nav-h);}
+header{background:rgba(253,252,250,0.95);border-bottom:1px solid var(--stone-light);padding:0 1rem;position:sticky;top:0;z-index:100;backdrop-filter:blur(12px);}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:var(--header-h);gap:.75rem;}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.logo-badge{width:32px;height:32px;background:var(--sage);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);color:white;font-size:10px;letter-spacing:-.5px;line-height:1.1;text-align:center;}
+.logo-text{font-size:14px;font-weight:600;color:var(--ink);letter-spacing:-.3px;}
+.logo-text .logo-sub{color:var(--stone);font-weight:300;font-size:10px;display:block;}
+.nav-tabs{display:flex;gap:2px;background:var(--mist);border:1px solid var(--stone-light);border-radius:10px;padding:3px;overflow-x:auto;}
+.nav-tab{padding:6px 10px;border:none;background:transparent;border-radius:8px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.nav-tab:hover{color:var(--ink);}
+.nav-tab.active{background:var(--warm-white);color:var(--ink);box-shadow:var(--shadow);}
+.nav-tab.active.tab-rpd{color:var(--sage);}.nav-tab.active.tab-verify{color:var(--lavender);}.nav-tab.active.tab-history{color:var(--clay);}.nav-tab.active.tab-relax{color:var(--teal);}.nav-tab.active.tab-expo{color:var(--gold);}
+.header-right{display:flex;gap:8px;flex-shrink:0;}
+.btn-primary{padding:7px 14px;background:var(--sage);border:none;border-radius:8px;font-family:var(--font-body);font-size:12px;font-weight:500;color:white;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.btn-primary:hover{background:#7a9b7e;}
+.sb-btn{padding:6px 10px;border:1.5px solid var(--stone-light);background:transparent;border-radius:8px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--stone);cursor:pointer;display:flex;align-items:center;gap:5px;transition:all .2s;}
+.sb-btn:hover{border-color:var(--lavender);color:var(--lavender);}
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(253,252,250,0.97);border-top:1px solid var(--stone-light);backdrop-filter:blur(16px);height:var(--bottom-nav-h);padding:0 2px;padding-bottom:env(safe-area-inset-bottom);}
+.bottom-nav-inner{display:flex;height:100%;align-items:stretch;}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:transparent;cursor:pointer;font-family:var(--font-body);font-size:9px;font-weight:500;color:var(--stone);padding:4px 2px;border-radius:8px;transition:all .2s;position:relative;}
+.bnav-btn:active{background:var(--mist);}
+.bnav-btn .bnav-icon{font-size:18px;line-height:1;transition:transform .2s;}
+.bnav-btn.active{color:var(--sage);}.bnav-btn.active.b-rpd{color:var(--sage);}.bnav-btn.active.b-verify{color:var(--lavender);}.bnav-btn.active.b-relax{color:var(--teal);}.bnav-btn.active.b-history{color:var(--clay);}.bnav-btn.active.b-expo{color:var(--gold);}
+.bnav-btn.active .bnav-icon{transform:translateY(-2px);}
+.view{display:none;}.view.active{display:block;animation:viewIn .25s ease;}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.hero{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 1rem;}
+.pokedex-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--stone);margin-bottom:5px;display:block;}
+.hero h1{font-family:var(--font-display);font-size:clamp(1.6rem,6vw,2.8rem);line-height:1.1;color:var(--ink);margin-bottom:8px;}
+.hero h1 em{font-style:italic;color:var(--sage);}.hero h1 em.teal{color:var(--teal);}.hero h1 em.gold{color:var(--gold);}
+.hero p{font-size:13.5px;color:var(--stone);font-weight:300;line-height:1.6;max-width:540px;}
+.hero-row{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.hero-stats{display:flex;gap:1rem;flex-shrink:0;}
+.stat-item{text-align:center;}
+.stat-num{font-family:var(--font-display);font-size:1.8rem;line-height:1;}
+.stat-num.rpd{color:var(--sage);}.stat-num.vh{color:var(--lavender);}.stat-num.rx{color:var(--teal);}.stat-num.exp{color:var(--gold);}
+.stat-label{font-size:10px;color:var(--stone);}
+.hero-meta{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500;}
+.tag-sage{background:var(--sage-light);color:#4a7a4e;}.tag-teal{background:var(--teal-light);color:#2d7a84;}.tag-lavender{background:var(--lavender-light);color:#6b5e9a;}.tag-clay{background:var(--clay-light);color:#9a5242;}.tag-gold{background:var(--gold-light);color:#7a6208;}
+.main{max-width:1100px;margin:0 auto;padding:0 1rem 1.5rem;}
+.home-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem;}
+.home-cards-2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.25rem;}
+.tool-card{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius);padding:1.25rem;cursor:pointer;transition:all .25s;box-shadow:var(--shadow);position:relative;overflow:hidden;}
+.tool-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--radius) var(--radius) 0 0;}
+.tool-card.rpd::before{background:var(--sage);}.tool-card.verify::before{background:var(--lavender);}.tool-card.relax::before{background:var(--teal);}.tool-card.expo::before{background:var(--gold);}.tool-card.exp::before{background:var(--amber);}
+.tool-card:hover,.tool-card:active{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.tool-card-icon{font-size:1.8rem;margin-bottom:10px;display:block;}
+.tool-card h3{font-family:var(--font-display);font-size:1rem;color:var(--ink);margin-bottom:6px;}
+.tool-card p{font-size:12px;color:var(--stone);font-weight:300;line-height:1.5;margin-bottom:12px;}
+.tool-card-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border:none;border-radius:8px;font-family:var(--font-body);font-size:12px;font-weight:500;color:white;cursor:pointer;transition:all .2s;}
+.tool-card.rpd .tool-card-btn{background:var(--sage);}.tool-card.verify .tool-card-btn{background:var(--lavender);}.tool-card.relax .tool-card-btn{background:var(--teal);}.tool-card.expo .tool-card-btn{background:var(--gold);}.tool-card.exp .tool-card-btn{background:var(--amber);}
+.card{background:var(--warm-white);border-radius:var(--radius);border:1px solid var(--stone-light);padding:1.25rem;box-shadow:var(--shadow);margin-bottom:1rem;}
+.card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:1.25rem;}
+.card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.icon-sage{background:var(--sage-pale);}.icon-clay{background:var(--clay-light);}.icon-lavender{background:var(--lavender-light);}.icon-amber{background:var(--amber-light);}.icon-teal{background:var(--teal-pale);}.icon-gold{background:var(--gold-light);}
+.card-title{font-family:var(--font-display);font-size:1.1rem;color:var(--ink);margin-bottom:3px;}
+.card-desc{font-size:13px;color:var(--stone);font-weight:300;line-height:1.5;}
+.callout{display:flex;gap:10px;padding:12px 14px;border-radius:var(--radius-sm);background:var(--sage-pale);border-left:3px solid var(--sage);margin-bottom:.875rem;font-size:12.5px;color:var(--ink);line-height:1.55;font-weight:300;}
+.callout-icon{font-size:14px;flex-shrink:0;}
+.callout.teal{background:var(--teal-pale);border-color:var(--teal);}.callout.gold{background:var(--gold-pale);border-color:var(--gold);}.callout.lavender{background:var(--lavender-pale);border-color:var(--lavender);}
+.form-group{margin-bottom:1rem;}
+.form-label{display:block;font-size:12.5px;font-weight:500;color:var(--ink);margin-bottom:5px;}
+.form-hint{font-size:11.5px;color:var(--stone);font-weight:300;margin-bottom:6px;font-style:italic;}
+.form-control{width:100%;padding:11px 13px;border:1.5px solid var(--stone-light);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--warm-white);transition:all .2s;resize:none;line-height:1.55;}
+.form-control:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,171,142,0.15);}
+.form-control::placeholder{color:var(--stone-light);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.emotion-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.emotion-chip{padding:7px 13px;border-radius:20px;border:1.5px solid var(--stone-light);background:transparent;font-family:var(--font-body);font-size:13px;font-weight:400;color:var(--stone);cursor:pointer;transition:all .2s;}
+.emotion-chip.selected{background:var(--clay-light);border-color:var(--clay);color:#8a3d2a;font-weight:500;}
+.emotion-intensity-block{margin-top:14px;padding:12px;background:var(--mist);border-radius:var(--radius-sm);border:1px solid var(--stone-light);}
+.emotion-intensity-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.emotion-intensity-row:last-child{margin-bottom:0;}
+.emo-name{font-size:12px;font-weight:500;color:var(--ink);width:95px;flex-shrink:0;}
+.emo-bar-wrap{flex:1;position:relative;height:6px;}
+.emo-bar-bg{position:absolute;inset:0;background:var(--stone-light);border-radius:3px;}
+.emo-bar-fill{position:absolute;top:0;left:0;bottom:0;background:linear-gradient(to right,var(--sage-light),var(--clay));border-radius:3px;transition:width .2s;}
+.emo-range{position:absolute;top:0;left:0;width:100%;opacity:0;cursor:pointer;margin:0;padding:0;-webkit-appearance:none;height:20px;top:-7px;}
+.emo-val{font-family:var(--font-display);font-size:.95rem;color:var(--clay);width:32px;text-align:right;font-style:italic;flex-shrink:0;}
+.distortion-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px;}
+.distortion-card{padding:10px 12px;border:1.5px solid var(--stone-light);border-radius:var(--radius-sm);cursor:pointer;transition:all .2s;background:transparent;font-family:var(--font-body);text-align:left;}
+.distortion-card.selected{border-color:var(--lavender);background:var(--lavender-light);}
+.distortion-name{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:2px;}
+.distortion-card.selected .distortion-name{color:#5b4e8a;}
+.distortion-def{font-size:11px;color:var(--stone);font-weight:300;line-height:1.4;}
+.evidence-cols{display:grid;grid-template-columns:1fr;gap:.75rem;}
+.evidence-col{background:var(--sage-pale);border-radius:var(--radius-sm);padding:.875rem;border:1px solid var(--sage-light);}
+.evidence-col.against{background:var(--clay-light);border-color:#deb5a8;}
+.evidence-col h4{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.evidence-col h4 .dot{width:7px;height:7px;border-radius:50%;}
+.evidence-col:not(.against) h4{color:#4a7a4e;}.evidence-col:not(.against) h4 .dot{background:var(--sage);}
+.evidence-col.against h4{color:#9a5242;}.evidence-col.against h4 .dot{background:var(--clay);}
+.evidence-col textarea{background:rgba(255,255,255,0.6);border-color:transparent;}
+.intensity-row{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.intensity-label{font-size:11px;color:var(--stone);width:70px;}
+.intensity-track{flex:1;height:6px;background:var(--stone-light);border-radius:3px;position:relative;}
+.intensity-fill{height:100%;background:linear-gradient(to right,var(--sage-light),var(--clay));border-radius:3px;transition:width .2s;}
+input[type="range"]{width:100%;-webkit-appearance:none;appearance:none;height:20px;border-radius:3px;background:transparent;outline:none;cursor:pointer;position:absolute;top:-7px;left:0;opacity:0;margin:0;}
+.slider-wrapper{flex:1;position:relative;}
+.intensity-value{font-family:var(--font-display);font-size:1rem;color:var(--clay);width:36px;text-align:right;font-style:italic;}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--stone-light);gap:.5rem;}
+.btn-nav{padding:11px 18px;border-radius:10px;font-family:var(--font-body);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap;}
+.btn-prev{background:transparent;border:1.5px solid var(--stone-light);color:var(--stone);}
+.btn-prev:hover{border-color:var(--ink);color:var(--ink);}
+.btn-next{background:var(--sage);border:none;color:white;box-shadow:0 4px 14px rgba(138,171,142,.35);animation:pulse-ring 2.5s infinite;}
+.btn-next:hover,.btn-next:active{background:#7a9b7e;animation:none;}
+.btn-finish{background:var(--clay);border:none;color:white;}
+.btn-finish:active{background:#b07360;}
+.btn-teal{background:var(--teal);border:none;color:white;}
+.btn-gold{background:var(--gold);border:none;color:white;}
+.btn-lavender{background:var(--lavender);border:none;color:white;}
+.btn-ghost{padding:9px 16px;border:1.5px solid var(--stone-light);background:transparent;border-radius:8px;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;}
+@keyframes pulse-ring{0%{box-shadow:0 4px 14px rgba(138,171,142,.35),0 0 0 0 rgba(138,171,142,.3);}70%{box-shadow:0 4px 14px rgba(138,171,142,.35),0 0 0 8px rgba(138,171,142,0);}100%{box-shadow:0 4px 14px rgba(138,171,142,.35),0 0 0 0 rgba(138,171,142,0);}}
+.progress-track{max-width:1100px;margin:0 auto;padding:1rem 1rem 0;}
+.progress-steps{display:flex;position:relative;}
+.progress-steps::before{content:'';position:absolute;top:14px;left:14px;right:14px;height:2px;background:var(--stone-light);z-index:0;}
+.progress-fill{position:absolute;top:14px;left:14px;height:2px;background:var(--sage);transition:width .5s cubic-bezier(.4,0,.2,1);z-index:1;}
+.step-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;position:relative;z-index:2;}
+.step-dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--stone-light);background:var(--warm-white);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--stone);font-weight:500;transition:all .3s;cursor:pointer;}
+.step-item.active .step-dot{border-color:var(--sage);background:var(--sage);color:white;box-shadow:0 0 0 3px rgba(138,171,142,.2);}
+.step-item.done .step-dot{border-color:var(--sage);background:var(--sage-light);color:var(--sage);}
+.progress-fill.gold{background:var(--gold);}
+.step-item.active.gold .step-dot{border-color:var(--gold);background:var(--gold);box-shadow:0 0 0 3px rgba(184,150,12,.2);}
+.step-item.done.gold .step-dot{border-color:var(--gold);background:var(--gold-light);color:var(--gold);}
+.progress-fill.lavender{background:var(--lavender);}
+.step-item.active.lavender .step-dot{border-color:var(--lavender);background:var(--lavender);box-shadow:0 0 0 3px rgba(155,142,196,.2);}
+.step-item.done.lavender .step-dot{border-color:var(--lavender);background:var(--lavender-light);color:var(--lavender);}
+.panel{display:none;animation:panelIn .35s ease;}.panel.active{display:block;}
+@keyframes panelIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.history-tabs{display:flex;gap:3px;background:var(--mist);border:1px solid var(--stone-light);border-radius:12px;padding:3px;margin-bottom:1.25rem;overflow-x:auto;}
+.history-tab{flex:1;min-width:60px;padding:9px 6px;border:none;background:transparent;border-radius:9px;font-family:var(--font-body);font-size:11.5px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.history-tab.active{background:var(--warm-white);color:var(--ink);box-shadow:var(--shadow);}
+.history-tab-panel{display:none;}.history-tab-panel.active{display:block;}
+.history-list{display:flex;flex-direction:column;gap:8px;}
+.history-item{background:var(--warm-white);border:1px solid var(--stone-light);border-radius:var(--radius-sm);padding:.875rem 1rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:space-between;gap:.875rem;}
+.history-item:active{border-color:var(--sage);box-shadow:var(--shadow);}
+.history-item.vh-item:active{border-color:var(--lavender);}.history-item.rx-item:active{border-color:var(--teal);}.history-item.expo-item:active{border-color:var(--gold);}.history-item.ec-item:active{border-color:var(--amber);}
+.history-item-left{flex:1;min-width:0;}
+.history-date{font-size:11px;color:var(--stone);font-weight:400;margin-bottom:2px;}
+.history-situation{font-size:13px;color:var(--ink);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.history-emotions{display:flex;gap:4px;margin-top:5px;flex-wrap:wrap;}
+.history-arrow{color:var(--stone);font-size:18px;flex-shrink:0;}
+.history-type-badge{font-size:10px;font-weight:600;padding:2px 6px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;}
+.badge-rpd{background:var(--sage-light);color:#4a7a4e;}.badge-vh{background:var(--lavender-light);color:#5b4e8a;}.badge-rx{background:var(--teal-light);color:#2d7a84;}.badge-expo{background:var(--gold-light);color:#7a6208;}.badge-ec{background:var(--amber-light);color:#8a6020;}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--stone);}
+.empty-state .empty-icon{font-size:2.5rem;margin-bottom:10px;opacity:.5;}
+.empty-state p{font-size:13px;font-weight:300;line-height:1.6;}
+.emotion-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;background:var(--clay-light);color:#8a3d2a;font-weight:500;margin-right:4px;margin-bottom:3px;}
+.distortion-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;background:var(--lavender-light);color:#5b4e8a;font-weight:500;margin-right:4px;margin-bottom:3px;}
+.summary-grid{display:grid;grid-template-columns:1fr;gap:.875rem;margin-top:1.25rem;}
+.summary-block{background:var(--mist);border-radius:var(--radius-sm);padding:1rem;border:1px solid var(--stone-light);}
+.summary-block.full{grid-column:1/-1;}
+.summary-block-label{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--stone);margin-bottom:6px;}
+.summary-block-value{font-size:13px;color:var(--ink);line-height:1.6;}
+.result-hero{text-align:center;padding:1.5rem 1rem;background:linear-gradient(135deg,var(--sage-pale) 0%,var(--lavender-light) 100%);border-radius:var(--radius);border:1px solid var(--sage-light);margin-bottom:1.25rem;}
+.result-hero h2{font-family:var(--font-display);font-size:1.5rem;margin-bottom:5px;color:var(--ink);}
+.result-hero p{font-size:13px;color:var(--stone);font-weight:300;}
+.before-after{display:grid;grid-template-columns:1fr;gap:.875rem;margin-top:1.25rem;}
+.before-card,.after-card{background:var(--warm-white);border-radius:var(--radius-sm);padding:1rem;border:1px solid var(--stone-light);}
+.before-card{border-color:#deb5a8;}.after-card{border-color:var(--sage-light);}
+.ba-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;}
+.before-card .ba-label{color:var(--clay);}.after-card .ba-label{color:var(--sage);}
+.ba-value{font-size:13px;color:var(--ink);line-height:1.5;}
+.expo-section-title{font-family:var(--font-display);font-size:1rem;color:var(--ink);margin:1.25rem 0 .75rem;display:flex;align-items:center;gap:8px;}
+.expo-section-title .badge{width:22px;height:22px;border-radius:50%;background:var(--gold);color:white;font-size:10px;font-family:var(--font-body);font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ladder{display:flex;flex-direction:column;gap:0;}
+.ladder-item{display:flex;align-items:stretch;gap:0;cursor:pointer;transition:all .2s;position:relative;}
+.ladder-item:not(:last-child)::after{content:'';position:absolute;left:24px;bottom:-12px;width:2px;height:12px;background:var(--stone-light);}
+.ladder-rung{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius-sm);flex:1;display:flex;align-items:center;gap:12px;padding:.875rem 1rem;margin-bottom:12px;transition:all .25s;box-shadow:var(--shadow);}
+.ladder-item:hover .ladder-rung,.ladder-item:active .ladder-rung{border-color:var(--gold);transform:translateX(4px);}
+.ladder-item.done .ladder-rung{background:var(--sage-pale);border-color:var(--sage-light);}
+.ladder-item.in-progress .ladder-rung{background:var(--gold-pale);border-color:var(--gold);}
+.ladder-suds{min-width:46px;text-align:center;}
+.suds-num{font-family:var(--font-display);font-size:1.5rem;line-height:1;color:var(--gold);}
+.suds-label{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--stone);}
+.ladder-item.done .suds-num{color:var(--sage);}
+.ladder-divider{width:1px;background:var(--stone-light);margin:4px 0;flex-shrink:0;}
+.ladder-content{flex:1;min-width:0;}
+.ladder-situation{font-size:13.5px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+.ladder-meta{display:flex;gap:6px;flex-wrap:wrap;}
+.ladder-badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.lb-pending{background:var(--stone-light);color:var(--stone);}.lb-progress{background:var(--gold-light);color:#7a6208;}.lb-done{background:var(--sage-light);color:#3a6b3e;}.lb-attempts{background:var(--teal-light);color:#2d7a84;}
+.ladder-actions{display:flex;flex-direction:column;gap:4px;align-items:flex-end;justify-content:center;flex-shrink:0;}
+.icon-btn{width:30px;height:30px;border:1.5px solid var(--stone-light);background:transparent;border-radius:8px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.icon-btn:hover{border-color:var(--ink);}.icon-btn.gold:hover{border-color:var(--gold);background:var(--gold-pale);}.icon-btn.danger:hover{border-color:var(--clay);background:var(--clay-light);}
+.add-item-form{background:var(--gold-pale);border:1.5px dashed var(--gold);border-radius:var(--radius-sm);padding:1rem;margin-top:.25rem;animation:panelIn .3s ease;}
+.suds-chip{padding:5px 10px;border:1.5px solid var(--stone-light);border-radius:20px;background:white;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;}
+.suds-chip.sel{border-color:var(--gold);background:var(--gold-light);color:#7a6208;}
+.attempt-overlay{display:none;position:fixed;inset:0;background:rgba(44,44,44,0.5);z-index:300;align-items:center;justify-content:center;padding:1rem;}
+.attempt-overlay.open{display:flex;}
+.attempt-modal{background:var(--warm-white);border-radius:var(--radius);padding:1.5rem;max-width:480px;width:100%;box-shadow:var(--shadow-lg);animation:panelIn .3s ease;max-height:90vh;overflow-y:auto;}
+.attempt-modal h3{font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin-bottom:.5rem;}
+.attempt-modal p{font-size:12.5px;color:var(--stone);font-weight:300;margin-bottom:1.25rem;}
+.attempt-close{float:right;background:transparent;border:none;font-size:20px;color:var(--stone);cursor:pointer;padding:0 4px;line-height:1;}
+.suds-0-25{color:#5b9fa8;}.suds-26-50{color:var(--amber);}.suds-51-75{color:#c4826b;}.suds-76-100{color:#b04040;}
+.attempt-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.attempt-row{background:var(--mist);border-radius:8px;padding:8px 10px;border:1px solid var(--stone-light);font-size:12px;}
+.attempt-row-header{display:flex;justify-content:space-between;margin-bottom:3px;}
+.attempt-row-date{color:var(--stone);font-size:10px;}
+.attempt-row-suds{display:flex;gap:8px;}
+.suds-pair{font-size:11px;color:var(--ink);}
+.suds-pair span{font-family:var(--font-display);font-size:.95rem;}
+.attempt-row-notes{font-size:11.5px;color:var(--stone);font-weight:300;font-style:italic;margin-top:2px;}
+.ec-phase{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius);margin-bottom:.875rem;overflow:hidden;box-shadow:var(--shadow);}
+.ec-phase-header{display:flex;align-items:center;gap:12px;padding:1rem 1.25rem;cursor:pointer;}
+.ec-phase-header:active{background:var(--lavender-pale);}
+.ec-phase.active-phase{border-color:var(--lavender);}
+.ec-phase-num{width:34px;height:34px;border-radius:50%;background:var(--lavender-light);color:#5b4e8a;font-family:var(--font-display);font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ec-phase.active-phase .ec-phase-num{background:var(--lavender);color:white;}
+.ec-phase.done-phase .ec-phase-num{background:var(--sage-light);color:var(--sage);font-size:14px;}
+.ec-phase-titles{flex:1;}
+.ec-phase-title{font-family:var(--font-display);font-size:.95rem;color:var(--ink);line-height:1.3;margin-bottom:1px;}
+.ec-phase-sub{font-size:11px;color:var(--stone);font-weight:300;}
+.ec-chevron{color:var(--stone);font-size:16px;transition:transform .25s;}
+.ec-phase.active-phase .ec-chevron{transform:rotate(180deg);color:var(--lavender);}
+.ec-body{display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--stone-light);}
+.ec-phase.active-phase .ec-body{display:block;}
+.ec-tip{display:flex;gap:9px;background:var(--lavender-pale);border-left:3px solid var(--lavender);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:9px 12px;font-size:12.5px;color:var(--ink);font-weight:300;line-height:1.55;margin:10px 0 12px;}
+.prediction-result{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-top:.875rem;}
+.pred-block{border-radius:var(--radius-sm);padding:.875rem;border:1px solid;}
+.pred-block.pred{background:var(--clay-light);border-color:#deb5a8;}.pred-block.result{background:var(--sage-pale);border-color:var(--sage-light);}
+.pred-block-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.pred-block.pred .pred-block-label{color:var(--clay);}.pred-block.result .pred-block-label{color:var(--sage);}
+.belief-comparison{display:grid;grid-template-columns:1fr auto 1fr;gap:.75rem;margin-top:.875rem;}
+.belief-box{border-radius:var(--radius-sm);padding:.875rem;border:1px solid var(--stone-light);background:var(--mist);}
+.belief-box-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--stone);margin-bottom:8px;}
+.belief-box-val{font-family:var(--font-display);font-size:2rem;line-height:1;text-align:center;margin-bottom:2px;}
+.bb-pre .belief-box-val{color:var(--clay);}.bb-post .belief-box-val{color:var(--sage);}
+.arrow-connector{display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:var(--stone);padding-top:1.5rem;}
+.vh-step{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius);margin-bottom:.875rem;overflow:hidden;transition:border-color .25s;box-shadow:var(--shadow);}
+.vh-step.open{border-color:var(--sage);}
+.vh-step-header{display:flex;align-items:center;gap:12px;padding:1rem 1.25rem;cursor:pointer;user-select:none;transition:background .2s;}
+.vh-step-header:active,.vh-step.open .vh-step-header{background:var(--sage-pale);}
+.vh-step-num{width:34px;height:34px;border-radius:50%;background:var(--sage-light);color:#3a6b3e;font-family:var(--font-display);font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s,color .2s;}
+.vh-step.open .vh-step-num{background:var(--sage);color:white;}
+.vh-step.completed .vh-step-num{background:var(--sage-light);color:var(--sage);font-size:14px;}
+.vh-step.completed{border-color:var(--sage-light);}
+.vh-step-titles{flex:1;}
+.vh-step-question{font-family:var(--font-display);font-size:.95rem;color:var(--ink);line-height:1.3;margin-bottom:1px;}
+.vh-step-subtitle{font-size:11px;color:var(--stone);font-weight:300;}
+.vh-chevron{color:var(--stone);font-size:16px;transition:transform .25s;flex-shrink:0;}
+.vh-step.open .vh-chevron{transform:rotate(180deg);color:var(--sage);}
+.vh-step-body{display:none;padding:0 1.25rem 1.25rem;border-top:1px solid var(--stone-light);}
+.vh-step.open .vh-step-body{display:block;}
+.vh-tip{display:flex;gap:9px;background:var(--amber-light);border-left:3px solid var(--amber);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:9px 12px;font-size:12.5px;color:var(--ink);font-weight:300;line-height:1.55;margin:10px 0 12px;}
+.vh-tip-icon{flex-shrink:0;}
+.vh-actions{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;}
+.vh-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--stone-light);border-radius:var(--radius-sm);font-family:var(--font-body);font-size:15px;color:var(--ink);background:var(--warm-white);transition:all .2s;resize:none;line-height:1.55;margin-top:7px;}
+.vh-textarea:focus{outline:none;border-color:var(--sage);box-shadow:0 0 0 3px rgba(138,171,142,.15);}
+.vh-textarea::placeholder{color:var(--stone-light);}
+.vh-label{font-size:12.5px;font-weight:500;color:var(--ink);margin-top:12px;display:block;}
+.vh-progress-summary{display:flex;gap:5px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.vh-prog-dot{width:10px;height:10px;border-radius:50%;background:var(--stone-light);transition:background .3s;}
+.vh-prog-dot.done{background:var(--sage);}
+.vh-emotion-selector{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0;}
+.vh-emo-chip{padding:7px 13px;border-radius:20px;border:1.5px solid var(--stone-light);background:transparent;font-family:var(--font-body);font-size:13px;color:var(--stone);cursor:pointer;transition:all .18s;}
+.vh-emo-chip.sel{background:var(--clay-light);border-color:var(--clay);color:#8a3d2a;font-weight:500;}
+.vh-result-bar{background:var(--sage-pale);border:1px solid var(--sage-light);border-radius:var(--radius);padding:1.5rem 1rem;text-align:center;margin-top:1.5rem;display:none;}
+.vh-result-bar h3{font-family:var(--font-display);font-size:1.3rem;color:var(--ink);margin-bottom:6px;}
+.vh-result-bar p{font-size:13px;color:var(--stone);font-weight:300;line-height:1.6;}
+.vh-summary-hero{background:linear-gradient(135deg,var(--lavender-light) 0%,var(--sage-pale) 100%);border-radius:var(--radius);padding:1.5rem 1rem;text-align:center;margin-bottom:1.25rem;border:1px solid var(--lavender-light);}
+.vh-summary-hero h2{font-family:var(--font-display);font-size:1.5rem;color:var(--ink);margin-bottom:5px;}
+.vh-summary-hero p{font-size:13px;color:var(--stone);font-weight:300;}
+.rx-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.875rem;margin-bottom:1.5rem;}
+.rx-card{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius);padding:1.25rem 1rem;cursor:pointer;transition:all .25s;box-shadow:var(--shadow);text-align:center;}
+.rx-card:active{border-color:var(--teal);transform:translateY(-2px);}
+.rx-card-icon{font-size:2rem;margin-bottom:8px;display:block;}
+.rx-card-title{font-family:var(--font-display);font-size:.95rem;color:var(--ink);margin-bottom:4px;}
+.rx-card-desc{font-size:11.5px;color:var(--stone);font-weight:300;line-height:1.45;}
+.rx-panel{display:none;}.rx-panel.active{display:block;animation:panelIn .35s ease;}
+.btn-back{display:inline-flex;align-items:center;gap:7px;padding:8px 14px;border:1.5px solid var(--stone-light);background:transparent;border-radius:8px;font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;margin-bottom:1.25rem;}
+.btn-back:active{border-color:var(--teal);color:var(--teal);}
+.breath-container{display:flex;flex-direction:column;align-items:center;padding:1rem 0;}
+.breath-circle-wrap{position:relative;width:220px;height:220px;margin:1.25rem auto;}
+.breath-ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--teal-light);}
+.breath-counter-ring{position:absolute;inset:0;}
+.breath-counter-ring svg{width:100%;height:100%;transform:rotate(-90deg);}
+.breath-counter-ring circle{fill:none;stroke:rgba(91,159,168,0.3);stroke-width:3;}
+.breath-counter-ring .progress{stroke:var(--teal);stroke-width:3;stroke-linecap:round;stroke-dasharray:565;stroke-dashoffset:565;transition:stroke-dashoffset 0.1s linear;}
+.breath-circle{position:absolute;inset:18px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.6),transparent 60%),radial-gradient(circle,var(--teal) 0%,#3d8a94 60%,#2d6e77 100%);display:flex;align-items:center;justify-content:center;box-shadow:0 0 40px rgba(91,159,168,0.4);transition:transform 0.1s linear;}
+.breath-text{font-family:var(--font-display);font-size:1.1rem;color:white;font-style:italic;text-align:center;line-height:1.2;pointer-events:none;user-select:none;}
+.breath-phase{font-size:.7rem;font-style:normal;font-family:var(--font-body);font-weight:300;opacity:.8;display:block;margin-top:2px;}
+.breath-controls{display:flex;flex-direction:column;align-items:center;gap:.875rem;width:100%;max-width:320px;}
+.breath-stats{display:flex;gap:1.75rem;margin-bottom:.25rem;}
+.breath-stat{text-align:center;}
+.breath-stat-num{font-family:var(--font-display);font-size:1.5rem;color:var(--teal);}
+.breath-stat-label{font-size:10px;color:var(--stone);}
+.breath-pattern-selector{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:.25rem;}
+.bp-btn{padding:6px 12px;border:1.5px solid var(--stone-light);background:transparent;border-radius:20px;font-family:var(--font-body);font-size:12px;font-weight:500;color:var(--stone);cursor:pointer;transition:all .2s;}
+.bp-btn.sel{background:var(--teal);border-color:var(--teal);color:white;}
+.breath-start-btn{padding:13px 32px;border:none;border-radius:12px;background:var(--teal);color:white;font-family:var(--font-body);font-size:15px;font-weight:500;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(91,159,168,.35);width:100%;max-width:220px;}
+.breath-start-btn.stop{background:var(--clay);}
+.breath-instructions{text-align:center;font-size:12.5px;color:var(--stone);font-weight:300;line-height:1.6;max-width:280px;}
+.balloon-wrap{position:relative;width:180px;height:220px;margin:.75rem auto;display:flex;align-items:center;justify-content:center;}
+.box-container{display:flex;flex-direction:column;align-items:center;padding:1rem 0;}
+.box-wrap{position:relative;width:200px;height:200px;margin:1rem auto;}
+.box-path{position:absolute;inset:0;}.box-path svg{width:100%;height:100%;}
+.box-dot{position:absolute;width:16px;height:16px;background:var(--teal);border-radius:50%;box-shadow:0 0 10px rgba(91,159,168,.6);top:0;left:0;transition:top .05s,left .05s;}
+.box-center-text{position:absolute;inset:50px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:1.1rem;color:var(--ink);font-style:italic;text-align:center;pointer-events:none;}
+.pmr-container{max-width:600px;margin:0 auto;}
+.pmr-body{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.25rem;}
+.pmr-figure{flex-shrink:0;width:80px;}.pmr-figure svg{width:100%;height:auto;}
+.muscle-group{fill:var(--stone-light);transition:fill .4s;}
+.muscle-group.tension{fill:var(--clay);animation:tension-pulse .3s ease;}
+.muscle-group.release{fill:var(--sage-light);}
+@keyframes tension-pulse{0%{fill:var(--stone-light);}50%{fill:#e05a3a;}100%{fill:var(--clay);}}
+.pmr-content{flex:1;min-width:0;}
+.pmr-step-indicator{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--stone);margin-bottom:4px;}
+.pmr-step-title{font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin-bottom:6px;}
+.pmr-instruction{font-size:13px;color:var(--stone);font-weight:300;line-height:1.6;margin-bottom:12px;}
+.pmr-phase-bar{height:6px;background:var(--stone-light);border-radius:3px;overflow:hidden;margin-bottom:10px;}
+.pmr-phase-fill{height:100%;background:var(--clay);border-radius:3px;transition:width linear;width:0%;}
+.pmr-phase-label{font-size:12px;color:var(--stone);text-align:center;margin-bottom:12px;font-style:italic;}
+.pmr-steps-list{display:flex;flex-direction:column;gap:5px;}
+.pmr-step-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;border:1px solid var(--stone-light);font-size:12.5px;color:var(--stone);}
+.pmr-step-item.current{background:var(--clay-light);border-color:var(--clay);color:var(--ink);font-weight:500;}
+.pmr-step-item.done{background:var(--sage-pale);border-color:var(--sage-light);color:var(--sage);}
+.pmr-step-dot{width:7px;height:7px;border-radius:50%;background:var(--stone-light);flex-shrink:0;}
+.pmr-step-item.current .pmr-step-dot{background:var(--clay);}.pmr-step-item.done .pmr-step-dot{background:var(--sage);}
+.pmr-controls{display:flex;gap:8px;flex-wrap:wrap;}
+.scan-container{max-width:540px;margin:0 auto;}
+.scan-body-row{display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.25rem;}
+.scan-figure{flex-shrink:0;}.scan-figure svg{width:70px;height:auto;}
+.scan-zone{fill:var(--stone-light);transition:fill .5s;}
+.scan-zone.scanning{fill:var(--teal);animation:scan-pulse 1.5s ease-in-out infinite;}
+.scan-zone.scanned{fill:var(--sage-light);}
+@keyframes scan-pulse{0%,100%{opacity:.7;}50%{opacity:1;}}
+.scan-text{flex:1;}
+.scan-step-num{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--stone);margin-bottom:3px;}
+.scan-zone-name{font-family:var(--font-display);font-size:1.2rem;color:var(--ink);margin-bottom:6px;}
+.scan-instruction{font-size:13px;color:var(--stone);font-weight:300;line-height:1.6;}
+.scan-bar{height:6px;background:var(--stone-light);border-radius:3px;overflow:hidden;margin:12px 0;}
+.scan-fill{height:100%;background:linear-gradient(to right,var(--teal),var(--sage));border-radius:3px;transition:width linear;}
+.grounding-container{max-width:560px;margin:0 auto;}
+.grounding-sense{background:var(--warm-white);border:1.5px solid var(--stone-light);border-radius:var(--radius);padding:1.25rem;margin-bottom:.875rem;transition:all .3s;}
+.grounding-sense.active-sense{border-color:var(--teal);background:var(--teal-pale);}
+.grounding-sense.done-sense{border-color:var(--sage-light);background:var(--sage-pale);}
+.sense-header{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.sense-num{font-family:var(--font-display);font-size:1.8rem;color:var(--teal);line-height:1;width:32px;flex-shrink:0;}
+.grounding-sense.done-sense .sense-num{color:var(--sage);}
+.sense-icon{font-size:1.4rem;}
+.sense-title{font-family:var(--font-display);font-size:1rem;color:var(--ink);}
+.sense-subtitle{font-size:11px;color:var(--stone);font-weight:300;}
+.sense-items{display:flex;flex-direction:column;gap:5px;}
+.sense-item{display:flex;align-items:center;gap:8px;}
+.sense-item input[type="text"]{flex:1;padding:9px 11px;border:1.5px solid var(--stone-light);border-radius:8px;font-family:var(--font-body);font-size:15px;color:var(--ink);background:white;transition:all .2s;}
+.sense-item input[type="text"]:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(91,159,168,.15);}
+.sense-item input[type="text"]::placeholder{color:var(--stone-light);}
+.sense-check{width:26px;height:26px;min-width:26px;border-radius:7px;border:1.5px solid var(--stone-light);background:white;flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;font-size:12px;}
+.sense-check.checked{background:var(--teal);border-color:var(--teal);color:white;}
+/* ── SETTINGS MODAL ── */
+.settings-modal{background:var(--warm-white);border-radius:var(--radius);padding:1.5rem;max-width:560px;width:100%;box-shadow:var(--shadow-lg);animation:panelIn .3s ease;max-height:92vh;overflow-y:auto;}
+.settings-modal h3{font-family:var(--font-display);font-size:1.3rem;color:var(--ink);margin-bottom:.375rem;}
+.settings-modal .subtitle{font-size:12.5px;color:var(--stone);font-weight:300;margin-bottom:1.25rem;line-height:1.6;}
+.sql-block{background:#1e1e2e;color:#cdd6f4;font-size:10.5px;padding:14px;border-radius:10px;overflow-x:auto;line-height:1.6;white-space:pre;font-family:'Courier New',monospace;margin-bottom:8px;max-height:220px;overflow-y:auto;}
+.copy-btn{padding:6px 12px;border:1.5px solid var(--stone-light);background:white;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font-body);transition:all .2s;}
+.copy-btn:active{background:var(--sage-pale);border-color:var(--sage);}
+.sb-creds-box{background:var(--lavender-pale);border:1px solid var(--lavender-light);border-radius:10px;padding:1rem;margin:1rem 0;}
+.sb-creds-box .box-title{font-size:12px;font-weight:600;color:#5b4e8a;margin-bottom:.75rem;}
+.steps-list{list-style:none;counter-reset:steps;display:flex;flex-direction:column;gap:6px;margin-bottom:1rem;}
+.steps-list li{counter-increment:steps;display:flex;gap:10px;align-items:flex-start;font-size:12.5px;color:var(--stone);font-weight:300;line-height:1.5;}
+.steps-list li::before{content:counter(steps);min-width:22px;height:22px;border-radius:50%;background:var(--lavender-light);color:#5b4e8a;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.steps-list li strong{color:var(--ink);font-weight:500;}
+details{border:1px solid var(--stone-light);border-radius:10px;overflow:hidden;margin-bottom:1rem;}
+details summary{padding:.75rem 1rem;cursor:pointer;font-size:13px;font-weight:500;background:var(--mist);list-style:none;display:flex;justify-content:space-between;align-items:center;}
+details summary::after{content:'▾';color:var(--stone);}
+details[open] summary::after{content:'▴';}
+details .details-body{padding:.875rem 1rem;}
+.sb-status-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;padding:4px 10px;border-radius:20px;}
+.sb-status-badge.ok{background:var(--sage-pale);color:#3a6b3e;}
+.sb-status-badge.err{background:var(--clay-light);color:#8a3d2a;}
+.sb-status-badge.idle{background:var(--mist);color:var(--stone);}
+/* ── sync bar in history ── */
+.history-actions{display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem;flex-wrap:wrap;gap:.5rem;}
+@media (max-width:768px){.nav-tabs,.header-right{display:none;}.bottom-nav{display:flex;}.home-cards{grid-template-columns:1fr 1fr;}.home-cards-2{grid-template-columns:1fr 1fr;}.summary-grid{grid-template-columns:1fr 1fr;}.summary-grid .summary-block.full{grid-column:1/-1;}}
+@media (max-width:480px){.home-cards,.home-cards-2{grid-template-columns:1fr 1fr;}.distortion-grid{grid-template-columns:1fr;}.form-row{grid-template-columns:1fr;}.summary-grid{grid-template-columns:1fr;}.rx-grid{grid-template-columns:1fr 1fr;}.breath-circle-wrap{width:180px;height:180px;}.box-wrap{width:170px;height:170px;}.hero h1{font-size:1.55rem;}.btn-nav{padding:10px 14px;font-size:13px;}.nav-row{gap:.375rem;}.prediction-result,.belief-comparison{grid-template-columns:1fr;}.arrow-connector{display:none;}}
+@media (max-width:360px){.home-cards,.home-cards-2,.rx-grid{grid-template-columns:1fr;}}
+@media (max-width:768px){input,textarea,select{font-size:16px !important;}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-badge">RPD<br>TCC</div>
+      <div class="logo-text">POKEDEX<span class="logo-sub">Terapia Cognitivo Conductual</span></div>
+    </div>
+    <nav class="nav-tabs">
+      <button class="nav-tab tab-home active" onclick="showView('welcome')">🏠 Inicio</button>
+      <button class="nav-tab tab-rpd" onclick="startNew()">🧠 RPD</button>
+      <button class="nav-tab tab-verify" onclick="showView('verify')">🔎 VH</button>
+      <button class="nav-tab tab-expo" onclick="showView('expo')">🪜 Exposición</button>
+      <button class="nav-tab tab-expo" onclick="showView('ec')">🔬 Exp. Conductual</button>
+      <button class="nav-tab tab-relax" onclick="showView('relax')">🫁 Calma</button>
+      <button class="nav-tab tab-history" onclick="showView('history')">📋 Registros</button>
+    </nav>
+    <div class="header-right">
+      <button class="sb-btn" onclick="openSettings()">⚙️ Supabase <span id="sb-indicator" style="font-size:10px;">⚫</span></button>
+      <button class="btn-primary" onclick="startNew()">＋ Nuevo RPD</button>
+    </div>
+  </div>
+</header>
+
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bnav-btn b-home active" onclick="showView('welcome');setBNavActive(this)"><span class="bnav-icon">🏠</span>Inicio</button>
+    <button class="bnav-btn b-rpd" onclick="startNew();setBNavActive(this)"><span class="bnav-icon">🧠</span>RPD</button>
+    <button class="bnav-btn b-expo" onclick="showView('expo');setBNavActive(this)"><span class="bnav-icon">🪜</span>Expo</button>
+    <button class="bnav-btn b-expo" onclick="showView('ec');setBNavActive(this)"><span class="bnav-icon">🔬</span>EC</button>
+    <button class="bnav-btn b-verify" onclick="showView('verify');setBNavActive(this)"><span class="bnav-icon">🔎</span>VH</button>
+    <button class="bnav-btn b-relax" onclick="showView('relax');setBNavActive(this)"><span class="bnav-icon">🫁</span>Calma</button>
+    <button class="bnav-btn b-history" onclick="showView('history');setBNavActive(this)"><span class="bnav-icon">📋</span>Registros</button>
+  </div>
+</nav>
+
+<!-- ══ WELCOME ══ -->
+<div id="view-welcome" class="view active">
+  <div class="hero">
+    <span class="pokedex-label">POKEDEX · Herramientas TCC</span>
+    <div class="hero-row">
+      <div>
+        <h1>Entrena tu mente,<br><em>transforma</em> tus pensamientos.</h1>
+        <p>Herramientas TCC y DBT para identificar pensamientos, verificar emociones, enfrentar miedos y calmar tu sistema nervioso.</p>
+        <div class="hero-meta">
+          <span class="tag tag-sage">🧠 Beck & Burns</span>
+          <span class="tag tag-lavender">✨ DBT</span>
+          <span class="tag tag-gold">🪜 Exposición</span>
+          <span class="tag tag-teal">🫁 Desactivación</span>
+        </div>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><div class="stat-num rpd" id="count-rpd">0</div><div class="stat-label">RPD</div></div>
+        <div class="stat-item"><div class="stat-num vh" id="count-vh">0</div><div class="stat-label">VH</div></div>
+        <div class="stat-item"><div class="stat-num exp" id="count-expo">0</div><div class="stat-label">🪜</div></div>
+        <div class="stat-item"><div class="stat-num rx" id="count-rx">0</div><div class="stat-label">🫁</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="home-cards">
+      <div class="tool-card rpd" onclick="startNew()"><span class="tool-card-icon">🧠</span><h3>Registro de Pensamientos</h3><p>6 columnas para reformular pensamientos negativos.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;"><span class="tag tag-sage">Beck</span><span class="tag tag-sage">Burns</span></div><button class="tool-card-btn">＋ Iniciar →</button></div>
+      <div class="tool-card verify" onclick="showView('verify');setBNavActive(document.querySelector('.b-verify'))"><span class="tool-card-icon">🔎</span><h3>Verificar los Hechos</h3><p>Examina si tu emoción concuerda con los hechos objetivos.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;"><span class="tag tag-lavender">DBT</span></div><button class="tool-card-btn">Iniciar →</button></div>
+      <div class="tool-card relax" onclick="showView('relax');setBNavActive(document.querySelector('.b-relax'))"><span class="tool-card-icon">🫁</span><h3>Desactivación Fisiológica</h3><p>Respiración, relajación muscular, grounding y más.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;"><span class="tag tag-teal">PMR</span><span class="tag tag-teal">5-4-3-2-1</span></div><button class="tool-card-btn">Explorar →</button></div>
+    </div>
+    <div class="home-cards-2">
+      <div class="tool-card expo" onclick="showView('expo');setBNavActive(document.querySelector('.b-expo'))"><span class="tool-card-icon">🪜</span><h3>Jerarquía de Exposición</h3><p>Construye una escalera SUDS y registra intentos graduales.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;"><span class="tag tag-gold">SUDS</span><span class="tag tag-gold">Exposición gradual</span></div><button class="tool-card-btn">Construir →</button></div>
+      <div class="tool-card exp" onclick="showView('ec');setBNavActive(document.querySelector('.b-expo'))"><span class="tool-card-icon">🔬</span><h3>Experimento Conductual</h3><p>Pon a prueba una creencia negativa con evidencia real.</p><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;"><span class="tag tag-clay">TCC</span><span class="tag tag-clay">Beck</span></div><button class="tool-card-btn">Iniciar →</button></div>
+    </div>
+    <div class="callout teal"><span class="callout-icon">💡</span><span>Cuando notes activación fisiológica intensa, prueba primero las técnicas de desactivación antes del RPD o exposición.</span></div>
+  </div>
+</div>
+
+<!-- ══ RPD ══ -->
+<div id="view-form" class="view">
+  <div class="progress-track">
+    <div class="progress-steps" id="progress-steps">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      <div class="step-item active" onclick="goToStep(0)"><div class="step-dot">1</div></div>
+      <div class="step-item" onclick="goToStep(1)"><div class="step-dot">2</div></div>
+      <div class="step-item" onclick="goToStep(2)"><div class="step-dot">3</div></div>
+      <div class="step-item" onclick="goToStep(3)"><div class="step-dot">4</div></div>
+      <div class="step-item" onclick="goToStep(4)"><div class="step-dot">5</div></div>
+      <div class="step-item" onclick="goToStep(5)"><div class="step-dot">6</div></div>
+      <div class="step-item" onclick="goToStep(6)"><div class="step-dot">7</div></div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="panel active" id="step-0"><div class="card"><div class="card-header"><div class="card-icon icon-sage">🌪️</div><div><div class="card-title">Situación</div><div class="card-desc">Describe objetivamente qué ocurrió — hechos, no interpretaciones.</div></div></div><div class="form-row"><div class="form-group"><label class="form-label">Fecha y hora</label><input type="datetime-local" class="form-control" id="f-datetime"></div><div class="form-group"><label class="form-label">Contexto</label><input type="text" class="form-control" id="f-context" placeholder="Trabajo, casa…"></div></div><div class="form-group"><label class="form-label">Describe la situación</label><textarea class="form-control" id="f-situation" rows="4" placeholder="¿Qué sucedió exactamente?"></textarea></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="showView('welcome')">← Inicio</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-1"><div class="card"><div class="card-header"><div class="card-icon icon-clay">💔</div><div><div class="card-title">Emociones</div><div class="card-desc">Selecciona y evalúa la intensidad (0–100).</div></div></div><div class="form-group"><label class="form-label">Selecciona tus emociones</label><div class="emotion-grid" id="emotion-grid"><button class="emotion-chip" onclick="toggleEmotion(this,'Tristeza')">😢 Tristeza</button><button class="emotion-chip" onclick="toggleEmotion(this,'Ansiedad')">😰 Ansiedad</button><button class="emotion-chip" onclick="toggleEmotion(this,'Enojo')">😡 Enojo</button><button class="emotion-chip" onclick="toggleEmotion(this,'Vergüenza')">😳 Vergüenza</button><button class="emotion-chip" onclick="toggleEmotion(this,'Culpa')">😔 Culpa</button><button class="emotion-chip" onclick="toggleEmotion(this,'Miedo')">😨 Miedo</button><button class="emotion-chip" onclick="toggleEmotion(this,'Frustración')">😤 Frustración</button><button class="emotion-chip" onclick="toggleEmotion(this,'Soledad')">🫥 Soledad</button><button class="emotion-chip" onclick="toggleEmotion(this,'Confusión')">😵 Confusión</button><button class="emotion-chip" onclick="toggleEmotion(this,'Decepción')">😞 Decepción</button><button class="emotion-chip" onclick="toggleEmotion(this,'Desesperanza')">🌑 Desesperanza</button><button class="emotion-chip" onclick="toggleEmotion(this,'Inseguridad')">😟 Inseguridad</button></div></div><div class="emotion-intensity-block" id="intensity-block" style="display:none;"><div class="form-label" style="margin-bottom:10px;">Intensidad (0–100)</div><div id="intensity-sliders"></div></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-2"><div class="card"><div class="card-header"><div class="card-icon icon-lavender">💭</div><div><div class="card-title">Pensamientos automáticos</div><div class="card-desc">¿Qué cruzó por tu mente? Marca el más caliente con ☆.</div></div></div><div class="callout"><span class="callout-icon">💡</span>Escríbelos tal como aparecieron, sin filtrar.</div><div class="form-group"><label class="form-label">Pensamientos automáticos</label><textarea class="form-control" id="f-thoughts" rows="4" placeholder="☆ Mi trabajo no vale nada.&#10;No soy tan bueno como mis colegas."></textarea></div><div class="form-group"><label class="form-label">Creencia en el pensamiento caliente (0–100%)</label><div class="intensity-row"><span class="intensity-label">Nada creíble</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="belief-fill" style="width:50%"></div></div><input type="range" min="0" max="100" value="50" id="f-belief" oninput="updateSlider('belief-fill','belief-val',this.value)"></div><span class="intensity-value" id="belief-val">50%</span></div></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-3"><div class="card"><div class="card-header"><div class="card-icon icon-lavender">🔍</div><div><div class="card-title">Distorsiones cognitivas</div><div class="card-desc">¿Qué errores de pensamiento identificas?</div></div></div><div class="distortion-grid" id="distortion-grid"><button class="distortion-card" onclick="toggleDistortion(this,'Pensamiento todo-o-nada')"><div class="distortion-name">⬛ Todo-o-nada</div><div class="distortion-def">Ver en blanco y negro, sin matices.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Generalización excesiva')"><div class="distortion-name">🔁 Generalización</div><div class="distortion-def">Si ocurrió una vez, siempre ocurrirá.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Filtro mental')"><div class="distortion-name">🔬 Filtro mental</div><div class="distortion-def">Solo enfocarse en lo negativo.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Descalificación de lo positivo')"><div class="distortion-name">❌ Descalificar lo positivo</div><div class="distortion-def">Desestimar experiencias positivas.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Lectura del pensamiento')"><div class="distortion-name">🧿 Lectura del pensamiento</div><div class="distortion-def">Asumir lo que otros piensan.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Predicción del futuro')"><div class="distortion-name">🔮 Predicción del futuro</div><div class="distortion-def">Anticipar que las cosas saldrán mal.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Magnificación')"><div class="distortion-name">🔭 Magnificación</div><div class="distortion-def">Exagerar errores, minimizar logros.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Razonamiento emocional')"><div class="distortion-name">💥 Razonamiento emocional</div><div class="distortion-def">Si lo siento, debe ser verdad.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Afirmaciones debería')"><div class="distortion-name">📏 "Debería"</div><div class="distortion-def">Reglas rígidas de cómo ser.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Etiquetado')"><div class="distortion-name">🏷️ Etiquetado</div><div class="distortion-def">Etiqueta negativa global.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Personalización')"><div class="distortion-name">🎯 Personalización</div><div class="distortion-def">Culparte por lo que no controlas.</div></button><button class="distortion-card" onclick="toggleDistortion(this,'Catastrofización')"><div class="distortion-name">🌋 Catastrofización</div><div class="distortion-def">El peor escenario como el más probable.</div></button></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-4"><div class="card"><div class="card-header"><div class="card-icon icon-amber">⚖️</div><div><div class="card-title">Evidencias</div><div class="card-desc">Examina la evidencia como un científico.</div></div></div><div class="callout"><span class="callout-icon">⚖️</span>La evidencia son hechos observables, no interpretaciones.</div><div class="evidence-cols"><div class="evidence-col"><h4><span class="dot"></span> A FAVOR</h4><textarea class="form-control" id="f-evidence-for" rows="5" placeholder="¿Qué hechos objetivos apoyan este pensamiento?"></textarea></div><div class="evidence-col against"><h4><span class="dot"></span> EN CONTRA</h4><textarea class="form-control" id="f-evidence-against" rows="5" placeholder="¿Qué hechos objetivos lo contradicen?"></textarea></div></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-5"><div class="card"><div class="card-header"><div class="card-icon icon-sage">🌱</div><div><div class="card-title">Pensamiento alternativo</div><div class="card-desc">Más realista y equilibrado — no necesariamente positivo.</div></div></div><div class="callout"><span class="callout-icon">🌱</span>¿Qué le dirías a un amigo con este pensamiento?</div><div class="form-group"><label class="form-label">Pensamiento alternativo</label><textarea class="form-control" id="f-alternative" rows="4" placeholder="Escribe una perspectiva más equilibrada…"></textarea></div><div class="form-group"><label class="form-label">Creencia (0–100%)</label><div class="intensity-row"><span class="intensity-label">Nada creíble</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="alt-belief-fill" style="width:70%"></div></div><input type="range" min="0" max="100" value="70" id="f-alt-belief" oninput="updateSlider('alt-belief-fill','alt-belief-val',this.value)"></div><span class="intensity-value" id="alt-belief-val">70%</span></div></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-next" onclick="nextStep()">Continuar →</button></div></div></div>
+    <div class="panel" id="step-6"><div class="card"><div class="card-header"><div class="card-icon icon-clay">🔄</div><div><div class="card-title">Resultado y reflexión</div><div class="card-desc">Re-evalúa tus emociones y reflexiona.</div></div></div><div class="form-group"><label class="form-label">Re-evalúa la intensidad ahora</label><div class="emotion-intensity-block" id="result-intensity-block"><p style="font-size:12px;color:var(--stone);font-style:italic;">Completa el paso de emociones primero.</p></div></div><div class="form-group"><label class="form-label">Reflexión y aprendizajes</label><textarea class="form-control" id="f-reflection" rows="3" placeholder="¿Qué aprendiste?"></textarea></div><div class="form-group"><label class="form-label">Acción concreta (opcional)</label><textarea class="form-control" id="f-action" rows="2" placeholder="¿Algo que puedas hacer diferente?"></textarea></div><div class="nav-row"><button class="btn-nav btn-prev" onclick="prevStep()">← Anterior</button><button class="btn-nav btn-finish" onclick="saveRPDRecord()">✓ Guardar</button></div></div></div>
+  </div>
+</div>
+
+<!-- ══ VERIFY ══ -->
+<div id="view-verify" class="view">
+  <div class="hero"><span class="pokedex-label">POKEDEX · DBT</span><h1>Verificar los <em>hechos</em></h1><p>Examina si tus emociones concuerdan con la situación objetiva.</p></div>
+  <div class="main">
+    <div class="callout"><span class="callout-icon">💡</span><span>Las emociones no son hechos. Esta herramienta examina si tu emoción concuerda con la realidad objetiva.</span></div>
+    <div class="vh-progress-summary"><div class="vh-prog-dot" id="vh-dot-1"></div><div class="vh-prog-dot" id="vh-dot-2"></div><div class="vh-prog-dot" id="vh-dot-3"></div><div class="vh-prog-dot" id="vh-dot-4"></div><div class="vh-prog-dot" id="vh-dot-5"></div><div class="vh-prog-dot" id="vh-dot-6"></div></div>
+    <div class="vh-step" id="vh-s1"><div class="vh-step-header" onclick="vhToggle(1)"><div class="vh-step-num">1</div><div class="vh-step-titles"><div class="vh-step-question">¿Cuál es la emoción que quiero cambiar?</div><div class="vh-step-subtitle">Nombra la emoción con precisión</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">💡</span><span>Nombrar con precisión es el primer paso para regular.</span></div><div class="vh-emotion-selector" id="vh-emo-chips"><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😢 Tristeza</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😰 Ansiedad</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😡 Enojo</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😳 Vergüenza</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😔 Culpa</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😨 Miedo</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😤 Frustración</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">😞 Decepción</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">💚 Celos</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">🫥 Soledad</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">🌑 Desesperanza</button><button class="vh-emo-chip" onclick="vhToggleEmo(this)">🤢 Asco</button></div><div class="vh-actions"><button class="btn-nav btn-next" onclick="vhMarkDone(1)">Siguiente →</button></div></div></div>
+    <div class="vh-step" id="vh-s2"><div class="vh-step-header" onclick="vhToggle(2)"><div class="vh-step-num">2</div><div class="vh-step-titles"><div class="vh-step-question">¿Cuál fue el evento?</div><div class="vh-step-subtitle">Solo lo observable con tus sentidos</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">🎥</span><span>¿Qué capturaría una cámara? Solo lo observable.</span></div><label class="vh-label">Describe el evento con hechos observables</label><textarea class="vh-textarea" id="vh-event" rows="4" placeholder="Mi compañero no me saludó cuando entré…"></textarea><div class="vh-actions"><button class="btn-nav btn-next" onclick="vhMarkDone(2)">Siguiente →</button></div></div></div>
+    <div class="vh-step" id="vh-s3"><div class="vh-step-header" onclick="vhToggle(3)"><div class="vh-step-num">3</div><div class="vh-step-titles"><div class="vh-step-question">¿Cuáles son mis interpretaciones?</div><div class="vh-step-subtitle">Genera interpretaciones alternativas</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">🌐</span><span>Una interpretación no es un hecho hasta ser verificada.</span></div><label class="vh-label">Mi interpretación inicial</label><textarea class="vh-textarea" id="vh-interp" rows="3" placeholder="Mi compañero está enojado conmigo…"></textarea><label class="vh-label" style="margin-top:10px;">Otras interpretaciones posibles</label><textarea class="vh-textarea" rows="3" placeholder="— Puede que tenga un problema personal.&#10;— Puede que no me haya visto entrar."></textarea><div class="vh-actions"><button class="btn-nav btn-next" onclick="vhMarkDone(3)">Siguiente →</button></div></div></div>
+    <div class="vh-step" id="vh-s4"><div class="vh-step-header" onclick="vhToggle(4)"><div class="vh-step-num">4</div><div class="vh-step-titles"><div class="vh-step-question">¿Estoy asumiendo una amenaza?</div><div class="vh-step-subtitle">Etiqueta y evalúa su probabilidad</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">📊</span><span>Las emociones intensas tienden a sobreestimar amenazas.</span></div><label class="vh-label">¿Cuál es la amenaza específica?</label><textarea class="vh-textarea" id="vh-threat" rows="3" placeholder="Temo que mi compañero me haga el vacío…"></textarea><label class="vh-label" style="margin-top:10px;">Posibles resultados (incluye neutrales y positivos)</label><textarea class="vh-textarea" rows="4" placeholder="— Lo más probable: es solo un día difícil para él."></textarea><div class="vh-actions"><button class="btn-nav btn-next" onclick="vhMarkDone(4)">Siguiente →</button></div></div></div>
+    <div class="vh-step" id="vh-s5"><div class="vh-step-header" onclick="vhToggle(5)"><div class="vh-step-num">5</div><div class="vh-step-titles"><div class="vh-step-question">¿Qué es lo catastrófico?</div><div class="vh-step-subtitle">Imagina la catástrofe y cómo afrontarla</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">🌊</span><span>La catastrofización pierde fuerza cuando le ponemos nombre concreto.</span></div><label class="vh-label">Describe el peor escenario posible</label><textarea class="vh-textarea" id="vh-catastro" rows="3" placeholder="La catástrofe sería que mi compañero hable mal de mí…"></textarea><label class="vh-label" style="margin-top:10px;">¿Cómo podrías afrontarlo?</label><textarea class="vh-textarea" rows="4" placeholder="Resolución de problemas: hablar directamente."></textarea><div class="vh-actions"><button class="btn-nav btn-next" onclick="vhMarkDone(5)">Siguiente →</button></div></div></div>
+    <div class="vh-step" id="vh-s6"><div class="vh-step-header" onclick="vhToggle(6)"><div class="vh-step-num">6</div><div class="vh-step-titles"><div class="vh-step-question">¿Mi emoción concuerda con los hechos?</div><div class="vh-step-subtitle">Consulta a tu Mente Sabia</div></div><div class="vh-chevron">▾</div></div><div class="vh-step-body"><div class="vh-tip"><span class="vh-tip-icon">🧘</span><span>Respira y pregúntate si esta emoción refleja la realidad.</span></div><label class="vh-label">¿Qué dice tu Mente Sabia?</label><textarea class="vh-textarea" id="vh-wise" rows="4" placeholder="Aunque sentí ansiedad real, la situación no es tan amenazante…"></textarea><label class="vh-label" style="margin-top:12px;">¿Mi emoción concuerda con los hechos?</label><div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;"><label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="vh-congru" value="si" style="accent-color:var(--sage);width:18px;height:18px;"> Sí, son proporcionales</label><label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="vh-congru" value="parcial" style="width:18px;height:18px;"> Parcialmente desproporcionada</label><label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="vh-congru" value="no" style="width:18px;height:18px;"> No concuerdan</label></div><div class="vh-actions" style="margin-top:16px;"><button class="btn-nav btn-finish" onclick="saveVHRecord()">✓ Completar</button></div></div></div>
+    <div class="vh-result-bar" id="vh-result-bar"><div style="font-size:2.5rem;margin-bottom:10px;">🌿</div><h3>¡Completado!</h3><p>Recuerda: las emociones son válidas, pero no siempre reflejan la realidad objetiva.</p><div style="display:flex;gap:8px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;"><button class="btn-ghost" onclick="initVerify()">🔄 Repetir</button><button class="btn-nav btn-next" onclick="startNew()">＋ Crear RPD</button></div></div>
+  </div>
+</div>
+
+<!-- ══ EXPOSICIÓN ══ -->
+<div id="view-expo" class="view">
+  <div class="hero"><span class="pokedex-label">POKEDEX · Exposición gradual</span><h1>Jerarquía de <em class="gold">Exposición</em></h1><p>Construye tu escalera SUDS. Afronta cada peldaño a tu ritmo y registra cada intento.</p></div>
+  <div class="main">
+    <div class="card" id="expo-context-card">
+      <div class="card-header"><div class="card-icon icon-gold">🎯</div><div><div class="card-title">Miedo / situación objetivo</div><div class="card-desc">¿Qué quieres aprender a tolerar?</div></div></div>
+      <div class="callout gold"><span class="callout-icon">🪜</span><span>SUDS = Subjective Units of Distress Scale (0 = ninguna ansiedad, 100 = máxima).</span></div>
+      <div class="form-group"><label class="form-label">Nombre de la jerarquía</label><input type="text" class="form-control" id="expo-name" placeholder="Ej: Hablar en público…"></div>
+      <div class="form-group"><label class="form-label">Miedo central</label><textarea class="form-control" id="expo-fear" rows="2" placeholder="Ej: Si hablo en público, quedaré en ridículo."></textarea></div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem;">
+      <div class="expo-section-title" style="margin:0;"><div class="badge">📍</div> Peldaños</div>
+      <button class="btn-nav btn-gold" style="font-size:13px;padding:8px 16px;" onclick="toggleAddForm()">＋ Agregar peldaño</button>
+    </div>
+    <div class="add-item-form" id="add-item-form" style="display:none;">
+      <div class="form-group"><label class="form-label">Descripción de la situación</label><input type="text" class="form-control" id="new-item-text" placeholder="Ej: Llamar por teléfono a un desconocido…"></div>
+      <div class="form-group"><label class="form-label">Nivel SUDS anticipado</label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">
+          <button class="suds-chip" onclick="selectSuds(this,10)">10</button><button class="suds-chip" onclick="selectSuds(this,20)">20</button><button class="suds-chip" onclick="selectSuds(this,30)">30</button><button class="suds-chip" onclick="selectSuds(this,40)">40</button><button class="suds-chip" onclick="selectSuds(this,50)">50</button><button class="suds-chip" onclick="selectSuds(this,60)">60</button><button class="suds-chip" onclick="selectSuds(this,70)">70</button><button class="suds-chip" onclick="selectSuds(this,80)">80</button><button class="suds-chip" onclick="selectSuds(this,90)">90</button><button class="suds-chip" onclick="selectSuds(this,100)">100</button>
+          <span id="suds-selected-label" style="font-size:13px;color:var(--gold);font-weight:600;margin-left:8px;align-self:center;">SUDS: —</span>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Tipo</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="item-type" value="in-vivo" checked style="accent-color:var(--gold);"> In vivo</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="item-type" value="imagineria" style="accent-color:var(--gold);"> Imaginería</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="item-type" value="interoceptivo" style="accent-color:var(--gold);"> Interoceptivo</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="item-type" value="role-play" style="accent-color:var(--gold);"> Role play</label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;"><button class="btn-ghost" onclick="toggleAddForm()">Cancelar</button><button class="btn-nav btn-gold" onclick="addLadderItem()">✓ Agregar</button></div>
+    </div>
+    <div class="ladder" id="expo-ladder"><div class="empty-state" id="ladder-empty"><div class="empty-icon">🪜</div><p>Tu escalera está vacía.<br>Agrega peldaños con el botón de arriba.</p></div></div>
+    <div style="margin-top:1.25rem;display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-nav btn-gold" onclick="saveExpoHierarchy()">💾 Guardar jerarquía</button>
+      <button class="btn-ghost" onclick="loadExpoFromStorage()">📂 Cargar última</button>
+      <button class="btn-ghost" style="color:var(--clay);border-color:var(--clay);" onclick="resetExpo()">🗑️ Nueva</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attempt modal -->
+<div class="attempt-overlay" id="attempt-overlay" onclick="closeAttemptModal(event)">
+  <div class="attempt-modal" id="attempt-modal">
+    <button class="attempt-close" onclick="closeAttemptModal(null,true)">✕</button>
+    <h3 id="modal-title">Registrar intento</h3><p id="modal-situation"></p>
+    <div class="form-group"><label class="form-label">Fecha del intento</label><input type="datetime-local" class="form-control" id="attempt-date"></div>
+    <div class="form-group"><label class="form-label">SUDS anticipado</label><div class="intensity-row"><span class="intensity-label">0</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="ant-fill" style="width:50%"></div></div><input type="range" min="0" max="100" value="50" id="attempt-ant" oninput="updateSlider('ant-fill','ant-val',this.value)"></div><span class="intensity-value" id="ant-val">50</span></div></div>
+    <div class="form-group"><label class="form-label">SUDS real (pico)</label><div class="intensity-row"><span class="intensity-label">0</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="real-fill" style="width:50%"></div></div><input type="range" min="0" max="100" value="50" id="attempt-real" oninput="updateSlider('real-fill','real-val',this.value)"></div><span class="intensity-value" id="real-val">50</span></div></div>
+    <div class="form-group"><label class="form-label">SUDS al final</label><div class="intensity-row"><span class="intensity-label">0</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="end-fill" style="width:30%"></div></div><input type="range" min="0" max="100" value="30" id="attempt-end" oninput="updateSlider('end-fill','end-val',this.value)"></div><span class="intensity-value" id="end-val">30</span></div></div>
+    <div class="form-group"><label class="form-label">¿Completaste la exposición?</label><div style="display:flex;gap:8px;margin-top:6px;"><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="attempt-completed" value="si" checked style="accent-color:var(--sage);"> Sí</label><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="attempt-completed" value="parcial" style="accent-color:var(--amber);"> Parcialmente</label><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;"><input type="radio" name="attempt-completed" value="no" style="accent-color:var(--clay);"> No</label></div></div>
+    <div class="form-group"><label class="form-label">Observaciones</label><textarea class="form-control" id="attempt-notes" rows="3" placeholder="¿Qué ocurrió? ¿Qué aprendiste?"></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;"><button class="btn-ghost" onclick="closeAttemptModal(null,true)">Cancelar</button><button class="btn-nav btn-gold" onclick="saveAttempt()">✓ Guardar intento</button></div>
+  </div>
+</div>
+
+<!-- ══ EXPERIMENTO CONDUCTUAL ══ -->
+<div id="view-ec" class="view">
+  <div class="hero"><span class="pokedex-label">POKEDEX · TCC</span><h1>Experimento <em>Conductual</em></h1><p>Pon a prueba una creencia negativa con evidencia real del mundo.</p></div>
+  <div class="main">
+    <div class="callout lavender"><span class="callout-icon">🔬</span><span>Un experimento conductual transforma suposiciones en hipótesis verificables.</span></div>
+    <div class="vh-progress-summary" id="ec-prog-dots"></div>
+    <div class="ec-phase active-phase" id="ec-p1">
+      <div class="ec-phase-header" onclick="ecToggle(1)"><div class="ec-phase-num">1</div><div class="ec-phase-titles"><div class="ec-phase-title">Identifica la creencia a poner a prueba</div><div class="ec-phase-sub">¿Qué pensamiento quieres examinar?</div></div><div class="ec-chevron">▾</div></div>
+      <div class="ec-body"><div class="ec-tip"><span>💡</span><span>Debe ser una predicción concreta y falseable.</span></div><div class="form-group"><label class="form-label">Creencia / pensamiento automático</label><textarea class="form-control" id="ec-belief" rows="3" placeholder="Si hago X, entonces Y ocurrirá…"></textarea></div><div class="form-group"><label class="form-label">Creencia inicial (0–100%)</label><div class="intensity-row"><span class="intensity-label">0%</span><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="ec-bef-fill" style="width:80%"></div></div><input type="range" min="0" max="100" value="80" id="ec-belief-pre" oninput="updateSlider('ec-bef-fill','ec-bef-val',this.value)"></div><span class="intensity-value" id="ec-bef-val">80%</span></div></div><div class="form-group"><label class="form-label">Contexto / situación</label><input type="text" class="form-control" id="ec-context" placeholder="¿Cuándo / dónde?"></div><div class="vh-actions"><button class="btn-nav btn-lavender" onclick="ecMarkDone(1)">Siguiente →</button></div></div>
+    </div>
+    <div class="ec-phase" id="ec-p2">
+      <div class="ec-phase-header" onclick="ecToggle(2)"><div class="ec-phase-num">2</div><div class="ec-phase-titles"><div class="ec-phase-title">Formula tu predicción</div><div class="ec-phase-sub">¿Qué esperas que ocurra?</div></div><div class="ec-chevron">▾</div></div>
+      <div class="ec-body"><div class="ec-tip"><span>📋</span><span>Sé lo más específico posible: ¿qué, quién, cuándo, cómo?</span></div><div class="form-group"><label class="form-label">Predicción específica</label><textarea class="form-control" id="ec-prediction" rows="4" placeholder="Predicción A: Si pido ayuda a mi jefe, él pensará que soy incompetente…"></textarea></div><div class="form-group"><label class="form-label">Indicadores observables</label><textarea class="form-control" id="ec-indicators" rows="3" placeholder="¿Qué señales concretas indicarían que tenías razón?"></textarea></div><div class="vh-actions"><button class="btn-nav btn-lavender" onclick="ecMarkDone(2)">Siguiente →</button></div></div>
+    </div>
+    <div class="ec-phase" id="ec-p3">
+      <div class="ec-phase-header" onclick="ecToggle(3)"><div class="ec-phase-num">3</div><div class="ec-phase-titles"><div class="ec-phase-title">Diseña la conducta alternativa</div><div class="ec-phase-sub">¿Qué harás diferente?</div></div><div class="ec-chevron">▾</div></div>
+      <div class="ec-body"><div class="ec-tip"><span>⚗️</span><span>Elige una conducta que normalmente evitarías por la creencia.</span></div><div class="form-group"><label class="form-label">Conducta alternativa</label><textarea class="form-control" id="ec-behavior" rows="4" placeholder="Ej: Pedir ayuda a mi jefe mañana sobre el informe."></textarea></div><div class="form-group"><label class="form-label">Posibles obstáculos y cómo manejarlos</label><textarea class="form-control" id="ec-obstacles" rows="3" placeholder="Si siento ansiedad, primero haré respiración diafragmática…"></textarea></div><div class="form-group"><label class="form-label">Fecha / hora planificada</label><input type="datetime-local" class="form-control" id="ec-planned-date"></div><div class="vh-actions"><button class="btn-nav btn-lavender" onclick="ecMarkDone(3)">Listo, haré el experimento →</button></div></div>
+    </div>
+    <div class="ec-phase" id="ec-p4">
+      <div class="ec-phase-header" onclick="ecToggle(4)"><div class="ec-phase-num">4</div><div class="ec-phase-titles"><div class="ec-phase-title">Observa y registra lo que ocurrió</div><div class="ec-phase-sub">Completa después del experimento</div></div><div class="ec-chevron">▾</div></div>
+      <div class="ec-body"><div class="ec-tip"><span>📸</span><span>Registra solo lo observable, como lo haría una cámara.</span></div><div class="form-group"><label class="form-label">¿Qué ocurrió exactamente?</label><textarea class="form-control" id="ec-observation" rows="4" placeholder="Fui a la oficina de mi jefe. Le expliqué mi duda…"></textarea></div><div class="prediction-result"><div class="pred-block pred"><div class="pred-block-label">📋 Tu predicción era…</div><div id="ec-pred-summary" style="font-size:12.5px;color:var(--ink);font-weight:300;font-style:italic;">(completa la fase 2)</div></div><div class="pred-block result"><div class="pred-block-label">📸 Lo que ocurrió…</div><textarea class="form-control" id="ec-what-happened" rows="3" placeholder="¿Se cumplió la predicción?" style="background:rgba(255,255,255,0.6);border-color:transparent;"></textarea></div></div><div class="form-group" style="margin-top:.875rem;"><label class="form-label">¿Se cumplió la predicción A?</label><div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;"><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:9px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="ec-fulfilled" value="si" style="accent-color:var(--clay);"> Sí</label><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:9px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="ec-fulfilled" value="parcial" style="accent-color:var(--amber);"> Parcialmente</label><label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;padding:9px 14px;border:1.5px solid var(--stone-light);border-radius:10px;"><input type="radio" name="ec-fulfilled" value="no" style="accent-color:var(--sage);"> No</label></div></div><div class="vh-actions"><button class="btn-nav btn-lavender" onclick="ecMarkDone(4)">Siguiente →</button></div></div>
+    </div>
+    <div class="ec-phase" id="ec-p5">
+      <div class="ec-phase-header" onclick="ecToggle(5)"><div class="ec-phase-num">5</div><div class="ec-phase-titles"><div class="ec-phase-title">Conclusión y aprendizaje</div><div class="ec-phase-sub">¿Qué dice este experimento sobre tu creencia?</div></div><div class="ec-chevron">▾</div></div>
+      <div class="ec-body"><div class="ec-tip"><span>🔬</span><span>Un solo experimento añade evidencia, no "prueba" todo.</span></div><div class="form-group"><label class="form-label">¿Qué aprendiste?</label><textarea class="form-control" id="ec-learning" rows="4" placeholder="Aprendí que pedir ayuda no me hizo parecer incompetente…"></textarea></div><div class="form-group"><label class="form-label">Reformulación de la creencia original</label><textarea class="form-control" id="ec-reformulation" rows="3" placeholder="Una creencia más realista sería…"></textarea></div><div class="belief-comparison"><div class="belief-box bb-pre"><div class="belief-box-label">Creencia antes</div><div class="belief-box-val" id="ec-pre-display">80%</div></div><div class="arrow-connector">→</div><div class="belief-box bb-post"><div class="belief-box-label">Creencia ahora</div><div class="intensity-row" style="margin-top:8px;"><div class="slider-wrapper"><div class="intensity-track"><div class="intensity-fill" id="ec-aft-fill" style="width:40%;background:linear-gradient(to right,var(--sage-light),var(--sage));"></div></div><input type="range" min="0" max="100" value="40" id="ec-belief-post" oninput="updateECPost(this.value)"></div></div><div style="font-family:var(--font-display);font-size:2rem;text-align:center;color:var(--sage);margin-top:4px;" id="ec-post-val">40%</div></div></div>
+      <div class="form-group" style="margin-top:.875rem;"><label class="form-label">¿Próximo experimento? (opcional)</label><textarea class="form-control" id="ec-next" rows="2" placeholder="Podría repetirlo con otro compañero…"></textarea></div><div class="vh-actions"><button class="btn-nav btn-finish" onclick="saveECRecord()">✓ Guardar experimento</button></div></div>
+    </div>
+    <div class="vh-result-bar" id="ec-result-bar" style="background:linear-gradient(135deg,var(--lavender-pale),var(--sage-pale));border-color:var(--lavender-light);">
+      <div style="font-size:2.5rem;margin-bottom:10px;">🔬</div><h3>¡Experimento completado!</h3><p>Cada experimento es evidencia que actualiza tus creencias.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;"><button class="btn-ghost" onclick="initEC()">🔄 Nuevo experimento</button><button class="btn-nav btn-next" onclick="showView('expo');setBNavActive(document.querySelector('.b-expo'))">🪜 Ver jerarquía</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DESACTIVACIÓN ══ -->
+<div id="view-relax" class="view">
+  <div class="hero"><span class="pokedex-label">POKEDEX · Desactivación</span><h1>Calma tu sistema <em class="teal">nervioso</em></h1><p>Técnicas para reducir la activación del sistema nervioso simpático.</p></div>
+  <div class="main">
+    <div class="rx-panel active" id="rx-home">
+      <div class="callout teal"><span class="callout-icon">🫁</span><span>Elige la técnica que mejor se adapte a cómo te sientes ahora.</span></div>
+      <div class="rx-grid">
+        <div class="rx-card" onclick="openRx('diaphragmatic')"><span class="rx-card-icon">🫁</span><div class="rx-card-title">Respiración diafragmática</div><div class="rx-card-desc">Activa el nervio vago con respiración profunda.</div></div>
+        <div class="rx-card" onclick="openRx('balloon')"><span class="rx-card-icon">🎈</span><div class="rx-card-title">Respiración globo</div><div class="rx-card-desc">Visualiza un globo que se infla y desinfla.</div></div>
+        <div class="rx-card" onclick="openRx('box')"><span class="rx-card-icon">⬜</span><div class="rx-card-title">Respiración cuadrada</div><div class="rx-card-desc">4-4-4-4: Inhala, retén, exhala, retén.</div></div>
+        <div class="rx-card" onclick="openRx('pmr')"><span class="rx-card-icon">💪</span><div class="rx-card-title">Relajación muscular progresiva</div><div class="rx-card-desc">Tensiona y libera cada grupo muscular.</div></div>
+        <div class="rx-card" onclick="openRx('scan')"><span class="rx-card-icon">🔍</span><div class="rx-card-title">Escaneo corporal</div><div class="rx-card-desc">Atención plena recorriendo el cuerpo.</div></div>
+        <div class="rx-card" onclick="openRx('grounding')"><span class="rx-card-icon">🌍</span><div class="rx-card-title">Grounding 5-4-3-2-1</div><div class="rx-card-desc">Ancla al presente usando los 5 sentidos.</div></div>
+      </div>
+    </div>
+    <div class="rx-panel" id="rx-diaphragmatic"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-teal">🫁</div><div><div class="card-title">Respiración diafragmática</div><div class="card-desc">Activa el sistema nervioso parasimpático.</div></div></div><div class="breath-container"><div class="breath-pattern-selector"><button class="bp-btn sel" onclick="setBreathPattern(this,4,6,0,0)">4-6 Calma</button><button class="bp-btn" onclick="setBreathPattern(this,4,4,4,0)">4-4-4</button><button class="bp-btn" onclick="setBreathPattern(this,5,5,5,0)">5-5-5</button><button class="bp-btn" onclick="setBreathPattern(this,4,7,8,0)">4-7-8</button></div><div class="breath-circle-wrap" id="diafCircleWrap"><div class="breath-ring"></div><div class="breath-counter-ring"><svg viewBox="0 0 220 220"><circle cx="110" cy="110" r="90"/><circle class="progress" id="diafProgress" cx="110" cy="110" r="90"/></svg></div><div class="breath-circle" id="diafCircle"><div class="breath-text" id="diafText">Listo<span class="breath-phase" id="diafPhase">Presiona iniciar</span></div></div></div><div class="breath-stats"><div class="breath-stat"><div class="breath-stat-num" id="diafCycles">0</div><div class="breath-stat-label">ciclos</div></div><div class="breath-stat"><div class="breath-stat-num" id="diafTime">0:00</div><div class="breath-stat-label">tiempo</div></div></div><div class="breath-controls"><div class="breath-instructions">Inhala expandiendo el abdomen.</div><button class="breath-start-btn" id="diafBtn" onclick="toggleBreath('diaf')">▶ Iniciar</button></div></div></div></div>
+    <div class="rx-panel" id="rx-balloon"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-teal">🎈</div><div><div class="card-title">Respiración globo</div><div class="card-desc">El globo se infla al inhalar, se desinfla al exhalar.</div></div></div><div class="breath-container"><div class="balloon-wrap"><svg id="balloonSvg" viewBox="0 0 220 260" style="width:100%;height:100%;"><defs><radialGradient id="ballGrad" cx="35%" cy="30%"><stop offset="0%" stop-color="#a8d8df"/><stop offset="60%" stop-color="var(--teal)"/><stop offset="100%" stop-color="#2d6e77"/></radialGradient></defs><path id="balloonString" d="M110 200 Q108 215 110 230" stroke="#9e9890" stroke-width="1.5" fill="none"/><circle id="balloonKnot" cx="110" cy="202" r="4" fill="#3d8a94"/><ellipse id="balloonBody" cx="110" cy="110" rx="55" ry="65" fill="url(#ballGrad)" opacity="0.92"/><ellipse id="balloonHighlight" cx="90" cy="80" rx="16" ry="22" fill="white" opacity="0.25"/><text id="balloonLabel" x="110" y="115" text-anchor="middle" font-family="DM Serif Display,serif" font-size="14" fill="white" font-style="italic">Listo</text><text id="balloonSub" x="110" y="132" text-anchor="middle" font-family="DM Sans,sans-serif" font-size="10" fill="rgba(255,255,255,0.75)">Presiona iniciar</text></svg></div><div class="breath-stats"><div class="breath-stat"><div class="breath-stat-num" id="ballCycles">0</div><div class="breath-stat-label">ciclos</div></div><div class="breath-stat"><div class="breath-stat-num" id="ballTime">0:00</div><div class="breath-stat-label">tiempo</div></div></div><div class="breath-controls"><div class="breath-instructions">Tu abdomen es el globo.</div><button class="breath-start-btn" id="ballBtn" onclick="toggleBreath('ball')">▶ Iniciar</button></div></div></div></div>
+    <div class="rx-panel" id="rx-box"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-teal">⬜</div><div><div class="card-title">Respiración cuadrada</div><div class="card-desc">4-4-4-4: Inhala · Retén · Exhala · Retén.</div></div></div><div class="box-container"><div class="box-wrap" id="boxWrap"><div class="box-path"><svg viewBox="0 0 200 200"><rect x="18" y="18" width="164" height="164" rx="16" fill="none" stroke="var(--teal-light)" stroke-width="2"/><text x="100" y="13" text-anchor="middle" font-size="9" fill="var(--stone)" font-family="DM Sans,sans-serif">INHALA</text><text x="196" y="105" text-anchor="middle" font-size="9" fill="var(--stone)" font-family="DM Sans,sans-serif" transform="rotate(90,196,105)">RETÉN</text><text x="100" y="197" text-anchor="middle" font-size="9" fill="var(--stone)" font-family="DM Sans,sans-serif">EXHALA</text><text x="10" y="105" text-anchor="middle" font-size="9" fill="var(--stone)" font-family="DM Sans,sans-serif" transform="rotate(-90,10,105)">RETÉN</text></svg></div><div class="box-center-text" id="boxCenterText">Listo</div><div class="box-dot" id="boxDot" style="top:10px;left:10px;"></div></div><div class="breath-stats"><div class="breath-stat"><div class="breath-stat-num" id="boxCycles">0</div><div class="breath-stat-label">ciclos</div></div><div class="breath-stat"><div class="breath-stat-num" id="boxTime">0:00</div><div class="breath-stat-label">tiempo</div></div></div><div class="breath-controls"><div class="breath-instructions">Sigue el punto con la vista.</div><button class="breath-start-btn" id="boxBtn" onclick="toggleBreath('box')">▶ Iniciar</button></div></div></div></div>
+    <div class="rx-panel" id="rx-pmr"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-clay">💪</div><div><div class="card-title">Relajación muscular progresiva</div><div class="card-desc">Tensa 7 seg, libera 15 seg. Técnica de Jacobson.</div></div></div><div class="pmr-container"><div class="pmr-body"><div class="pmr-figure"><svg viewBox="0 0 80 200" xmlns="http://www.w3.org/2000/svg"><ellipse class="muscle-group" id="pmr-head" cx="40" cy="18" rx="14" ry="16"/><rect class="muscle-group" id="pmr-neck" x="33" y="32" width="14" height="10" rx="4"/><ellipse class="muscle-group" id="pmr-shoulders" cx="40" cy="50" rx="26" ry="10"/><rect class="muscle-group" id="pmr-chest" x="24" y="52" width="32" height="20" rx="6"/><rect class="muscle-group" id="pmr-larm" x="8" y="50" width="14" height="35" rx="6"/><rect class="muscle-group" id="pmr-rarm" x="58" y="50" width="14" height="35" rx="6"/><rect class="muscle-group" id="pmr-abdomen" x="24" y="74" width="32" height="22" rx="6"/><ellipse class="muscle-group" id="pmr-lhand" cx="15" cy="93" rx="7" ry="9"/><ellipse class="muscle-group" id="pmr-rhand" cx="65" cy="93" rx="7" ry="9"/><rect class="muscle-group" id="pmr-hips" x="22" y="98" width="36" height="16" rx="6"/><rect class="muscle-group" id="pmr-lthigh" x="22" y="116" width="16" height="32" rx="6"/><rect class="muscle-group" id="pmr-rthigh" x="42" y="116" width="16" height="32" rx="6"/><rect class="muscle-group" id="pmr-lcalf" x="22" y="150" width="16" height="28" rx="6"/><rect class="muscle-group" id="pmr-rcalf" x="42" y="150" width="16" height="28" rx="6"/><ellipse class="muscle-group" id="pmr-feet" cx="40" cy="185" rx="22" ry="8"/></svg></div><div class="pmr-content"><div class="pmr-step-indicator" id="pmrStepInd">Paso 1 de 10</div><div class="pmr-step-title" id="pmrStepTitle">Manos y antebrazos</div><div class="pmr-instruction" id="pmrInstruction">Cierra los puños con fuerza durante 7 segundos.</div><div class="pmr-phase-label" id="pmrPhaseLabel">Presiona Iniciar para comenzar</div><div class="pmr-phase-bar"><div class="pmr-phase-fill" id="pmrPhaseFill"></div></div><div class="pmr-controls"><button class="btn-nav btn-teal" id="pmrBtn" onclick="togglePMR()">▶ Iniciar</button><button class="btn-nav btn-prev" onclick="resetPMR()">↺</button></div></div></div><div class="pmr-steps-list" id="pmrStepsList"></div></div></div></div>
+    <div class="rx-panel" id="rx-scan"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-teal">🔍</div><div><div class="card-title">Escaneo corporal</div><div class="card-desc">Atención plena recorriendo cada zona del cuerpo.</div></div></div><div class="scan-container"><div class="scan-body-row"><div class="scan-figure"><svg viewBox="0 0 80 200" xmlns="http://www.w3.org/2000/svg"><ellipse class="scan-zone" id="scan-head" cx="40" cy="18" rx="14" ry="16"/><rect class="scan-zone" id="scan-neck" x="33" y="32" width="14" height="10" rx="4"/><ellipse class="scan-zone" id="scan-shoulders" cx="40" cy="50" rx="26" ry="10"/><rect class="scan-zone" id="scan-chest" x="24" y="52" width="32" height="20" rx="6"/><rect class="scan-zone" id="scan-larm" x="8" y="50" width="14" height="35" rx="6"/><rect class="scan-zone" id="scan-rarm" x="58" y="50" width="14" height="35" rx="6"/><rect class="scan-zone" id="scan-abdomen" x="24" y="74" width="32" height="22" rx="6"/><rect class="scan-zone" id="scan-hips" x="22" y="98" width="36" height="16" rx="6"/><rect class="scan-zone" id="scan-lthigh" x="22" y="116" width="16" height="32" rx="6"/><rect class="scan-zone" id="scan-rthigh" x="42" y="116" width="16" height="32" rx="6"/><rect class="scan-zone" id="scan-lcalf" x="22" y="150" width="16" height="28" rx="6"/><rect class="scan-zone" id="scan-rcalf" x="42" y="150" width="16" height="28" rx="6"/><ellipse class="scan-zone" id="scan-feet" cx="40" cy="185" rx="22" ry="8"/></svg></div><div class="scan-text"><div class="scan-step-num" id="scanStepNum">Zona 1 de 13</div><div class="scan-zone-name" id="scanZoneName">Cabeza</div><div class="scan-instruction" id="scanInstruction">Lleva tu atención a tu cabeza.</div><div class="scan-bar"><div class="scan-fill" id="scanFill" style="width:0%"></div></div><div class="pmr-controls"><button class="btn-nav btn-teal" id="scanBtn" onclick="toggleScan()">▶ Iniciar</button><button class="btn-nav btn-prev" onclick="resetScan()">↺</button></div></div></div></div></div></div>
+    <div class="rx-panel" id="rx-grounding"><button class="btn-back" onclick="closeRx()">← Volver</button><div class="card"><div class="card-header"><div class="card-icon icon-teal">🌍</div><div><div class="card-title">Grounding 5-4-3-2-1</div><div class="card-desc">Ancla tu atención al momento presente con los 5 sentidos.</div></div></div><div class="callout teal"><span class="callout-icon">🌍</span><span>El cerebro no puede procesar la entrada sensorial Y la espiral de ansiedad al mismo tiempo.</span></div><div class="grounding-container"><div class="grounding-sense active-sense" id="gs-5"><div class="sense-header"><div class="sense-num">5</div><div class="sense-icon">👁️</div><div><div class="sense-title">Puedes VER</div><div class="sense-subtitle">Mira a tu alrededor</div></div></div><div class="sense-items" id="si-5"></div></div><div class="grounding-sense" id="gs-4"><div class="sense-header"><div class="sense-num">4</div><div class="sense-icon">🤚</div><div><div class="sense-title">Puedes TOCAR</div><div class="sense-subtitle">Siente las texturas</div></div></div><div class="sense-items" id="si-4"></div></div><div class="grounding-sense" id="gs-3"><div class="sense-header"><div class="sense-num">3</div><div class="sense-icon">👂</div><div><div class="sense-title">Puedes ESCUCHAR</div><div class="sense-subtitle">Escucha activamente</div></div></div><div class="sense-items" id="si-3"></div></div><div class="grounding-sense" id="gs-2"><div class="sense-header"><div class="sense-num">2</div><div class="sense-icon">👃</div><div><div class="sense-title">Puedes OLER</div><div class="sense-subtitle">Aromas presentes</div></div></div><div class="sense-items" id="si-2"></div></div><div class="grounding-sense" id="gs-1"><div class="sense-header"><div class="sense-num">1</div><div class="sense-icon">👅</div><div><div class="sense-title">Puedes SABOREAR</div><div class="sense-subtitle">Sabor en tu boca</div></div></div><div class="sense-items" id="si-1"></div></div></div><div id="grounding-complete" style="display:none;" class="vh-result-bar"><div style="font-size:2.5rem;margin-bottom:10px;">🌍</div><h3>¡Grounding completado!</h3><p>Tómate un momento para notar cómo te sientes ahora.</p><div style="display:flex;gap:8px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;"><button class="btn-ghost" onclick="initGrounding()">🔄 Repetir</button><button class="btn-nav btn-teal btn-nav" onclick="startNew()">＋ Hacer RPD</button></div></div><div class="nav-row" id="grounding-nav" style="justify-content:flex-end;border-top:none;padding-top:.5rem;margin-top:.5rem;"><button class="btn-nav btn-teal" id="groundingBtn" onclick="advanceGrounding()">Siguiente sentido →</button></div></div></div>
+  </div>
+</div>
+
+<!-- ══ HISTORY ══ -->
+<div id="view-history" class="view">
+  <div class="hero"><span class="pokedex-label">POKEDEX · Historial</span><h1>Mis <em>registros</em></h1><p>RPDs, verificaciones, exposiciones, experimentos y sesiones de desactivación.</p></div>
+  <div class="main">
+    <div class="history-actions">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button id="sync-btn" class="btn-ghost" onclick="syncFromSupabase()" style="color:var(--teal);border-color:var(--teal);display:flex;align-items:center;gap:5px;font-size:13px;">☁️ Sync Supabase</button>
+        <button class="btn-ghost" onclick="exportExcel()" style="color:var(--sage);border-color:var(--sage);display:flex;align-items:center;gap:5px;font-size:13px;">📊 Excel</button>
+      </div>
+      <span id="sync-status" style="font-size:11.5px;color:var(--stone);"></span>
+    </div>
+    <div class="history-tabs">
+      <button class="history-tab active" onclick="switchHistoryTab('htab-all',this)">🗂️ Todos</button>
+      <button class="history-tab" onclick="switchHistoryTab('htab-rpd',this)">🧠 RPD</button>
+      <button class="history-tab" onclick="switchHistoryTab('htab-vh',this)">🔎 VH</button>
+      <button class="history-tab" onclick="switchHistoryTab('htab-expo',this)">🪜 Expo</button>
+      <button class="history-tab" onclick="switchHistoryTab('htab-ec',this)">🔬 EC</button>
+      <button class="history-tab" onclick="switchHistoryTab('htab-rx',this)">🫁 Calma</button>
+    </div>
+    <div class="history-tab-panel active" id="htab-all"><div id="history-all"></div></div>
+    <div class="history-tab-panel" id="htab-rpd"><div id="history-rpd-list"></div></div>
+    <div class="history-tab-panel" id="htab-vh"><div id="history-vh-list"></div></div>
+    <div class="history-tab-panel" id="htab-expo"><div id="history-expo-list"></div></div>
+    <div class="history-tab-panel" id="htab-ec"><div id="history-ec-list"></div></div>
+    <div class="history-tab-panel" id="htab-rx"><div id="history-rx-list"></div></div>
+  </div>
+</div>
+
+<!-- ══ SUMMARY ══ -->
+<div id="view-summary" class="view">
+  <div class="hero" style="padding-bottom:.75rem;"><span class="pokedex-label" id="summary-label">POKEDEX</span><h1>Registro <em>completado</em> ✓</h1></div>
+  <div class="main">
+    <div id="summary-content"></div>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;">
+      <button class="btn-ghost" onclick="exportCurrentPDF()" style="color:var(--clay);border-color:var(--clay);display:flex;align-items:center;gap:5px;">📄 PDF</button>
+      <button class="btn-ghost" onclick="exportExcel()" style="color:var(--sage);border-color:var(--sage);display:flex;align-items:center;gap:5px;">📊 Excel</button>
+      <button class="btn-nav btn-prev" onclick="showView('history');setBNavActive(document.querySelector('.b-history'))">📋 Registros</button>
+      <button class="btn-nav btn-next" onclick="startNew()">＋ Nuevo RPD</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SETTINGS MODAL ══ -->
+<div class="attempt-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-modal">
+    <button class="attempt-close" onclick="closeSettings()">✕</button>
+    <h3>⚙️ Conectar Supabase</h3>
+    <p class="subtitle">Los registros se guardan localmente <em>y</em> se sincronizan a tu base de datos en la nube de forma automática.</p>
+
+    <details>
+      <summary>📋 Paso 1 — Ejecuta este SQL en tu proyecto</summary>
+      <div class="details-body">
+        <ul class="steps-list">
+          <li>Ve a <strong>supabase.com</strong>, crea un proyecto gratuito.</li>
+          <li>Abre <strong>SQL Editor</strong> y ejecuta el siguiente script.</li>
+          <li>Ve a <strong>Settings → API</strong> y copia la URL y la clave anon.</li>
+        </ul>
+        <div class="sql-block" id="sql-schema">-- Ejecuta esto en SQL Editor → New query
+create table if not exists rpd_records (
+  id bigint primary key,
+  datetime text, context text, situation text,
+  emotions jsonb, thoughts text, belief text,
+  distortions jsonb, evidence_for text,
+  evidence_against text, alternative text,
+  alt_belief text, reflection text, action text
+);
+create table if not exists vh_records (
+  id bigint primary key,
+  date text, emotion text, event text,
+  interpretations text, threat text,
+  catastrophe text, wise_mind text, congruence text
+);
+create table if not exists expo_records (
+  id bigint primary key,
+  date text, name text, fear text, items jsonb
+);
+create table if not exists ec_records (
+  id bigint primary key, date text, belief text,
+  context text, prediction text, behavior text,
+  observation text, fulfilled text, learning text,
+  reformulation text, belief_pre int, belief_post int
+);
+create table if not exists rx_records (
+  id bigint primary key,
+  date text, technique text, duration int, cycles int
+);
+
+-- Desactiva RLS para uso personal (sin autenticación):
+alter table rpd_records disable row level security;
+alter table vh_records  disable row level security;
+alter table expo_records disable row level security;
+alter table ec_records  disable row level security;
+alter table rx_records  disable row level security;</div>
+        <button class="copy-btn" onclick="copySQLSchema()">📋 Copiar SQL</button>
+      </div>
+    </details>
+
+    <div class="sb-creds-box">
+      <div class="box-title">Paso 2 — Pega tus credenciales (Settings → API)</div>
+      <div class="form-group" style="margin-bottom:.75rem;">
+        <label class="form-label">Project URL</label>
+        <input type="text" class="form-control" id="sb-url-input" placeholder="https://xxxxxxxxxxxx.supabase.co">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Anon / Public Key</label>
+        <input type="password" class="form-control" id="sb-key-input" placeholder="eyJhbGciOiJIUzI1NiIs…">
+        <div style="margin-top:5px;font-size:11px;color:var(--stone);">La clave anon es segura para clientes — no da acceso de admin.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:.75rem;flex-wrap:wrap;">
+      <span id="sb-status-msg" style="font-size:12.5px;color:var(--stone);">Sin configurar</span>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-ghost" onclick="closeSettings()">Cancelar</button>
+        <button class="btn-nav btn-lavender" onclick="saveAndTestSB()">💾 Guardar y probar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ STORAGE (window.storage — persiste entre sesiones) ══
+const RPD_KEY='rpd_records',VH_KEY='vh_records',RX_KEY='rx_records',EXPO_KEY='expo_records',EC_KEY='ec_records';
+async function storageGet(k){try{const r=await window.storage.get(k);return r?JSON.parse(r.value):[];}catch{return[];}}
+async function storageSet(k,v){try{await window.storage.set(k,JSON.stringify(v));}catch(e){console.warn('storage.set',e);}}
+// Sync wrappers (cache en memoria para acceso síncrono en render)
+let _cache={};
+async function loadAllCache(){
+  const keys=[RPD_KEY,VH_KEY,RX_KEY,EXPO_KEY,EC_KEY];
+  await Promise.all(keys.map(async k=>{_cache[k]=await storageGet(k);}));
+}
+const getRPD=()=>_cache[RPD_KEY]||[];
+const getVH=()=>_cache[VH_KEY]||[];
+const getRX=()=>_cache[RX_KEY]||[];
+const getExpo=()=>_cache[EXPO_KEY]||[];
+const getEC=()=>_cache[EC_KEY]||[];
+async function saveArr(key,arr){_cache[key]=arr;await storageSet(key,arr);}
+
+// ══════════════════════════════════════
+// SUPABASE REST API
+// ══════════════════════════════════════
+let SB_URL = '';
+let SB_KEY  = '';
+async function loadSBCreds(){
+  try{const u=await window.storage.get('sb_url');const k=await window.storage.get('sb_key');SB_URL=u?u.value:'';SB_KEY=k?k.value:'';}catch{}
+  sbSetIndicator(SB_URL&&SB_KEY?'ok':'idle');
+}
+
+function sbSetIndicator(state){ // 'ok' | 'err' | 'idle'
+  const el=document.getElementById('sb-indicator');
+  if(!el)return;
+  el.textContent = state==='ok'?'🟢':state==='err'?'🔴':'⚫';
+}
+
+function sbHeaders(){
+  return {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Prefer':'return=minimal'};
+}
+
+async function sbInsert(table,data){
+  if(!SB_URL||!SB_KEY)return;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:sbHeaders(),body:JSON.stringify(data)});
+    if(!res.ok){const t=await res.text();console.warn(`SB [${table}]:`,t);sbSetIndicator('err');}
+    else sbSetIndicator('ok');
+  }catch(e){console.warn('Supabase unreachable:',e);sbSetIndicator('err');}
+}
+
+async function sbFetchAll(table){
+  if(!SB_URL||!SB_KEY)return null;
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/${table}?order=id.desc&limit=500`,
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    if(!res.ok)return null;
+    return await res.json();
+  }catch(e){return null;}
+}
+
+// Settings modal
+function openSettings(){
+  document.getElementById('sb-url-input').value=SB_URL;
+  document.getElementById('sb-key-input').value=SB_KEY;
+  const msg=document.getElementById('sb-status-msg');
+  msg.textContent=SB_URL?'Configurado — prueba la conexión':'Sin configurar';
+  msg.style.color='var(--stone)';
+  document.getElementById('settings-overlay').classList.add('open');
+}
+function closeSettings(){document.getElementById('settings-overlay').classList.remove('open');}
+
+async function saveAndTestSB(){
+  SB_URL=document.getElementById('sb-url-input').value.trim().replace(/\/$/,'');
+  SB_KEY=document.getElementById('sb-key-input').value.trim();
+  try{await window.storage.set('sb_url',SB_URL);await window.storage.set('sb_key',SB_KEY);}catch(e){console.warn('No se pudieron guardar las credenciales:',e);}
+  const msg=document.getElementById('sb-status-msg');
+  msg.textContent='⏳ Probando conexión…';msg.style.color='var(--stone)';
+  if(!SB_URL||!SB_KEY){msg.textContent='❌ Completa URL y clave anon';msg.style.color='var(--clay)';sbSetIndicator('err');return;}
+  try{
+    const res=await fetch(`${SB_URL}/rest/v1/rpd_records?limit=1`,
+      {headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}});
+    if(res.ok){msg.textContent='✅ Conexión exitosa — listo para sincronizar';msg.style.color='var(--sage)';sbSetIndicator('ok');}
+    else{const t=await res.text();msg.textContent=`❌ Error ${res.status} — ${t.substring(0,80)}`;msg.style.color='var(--clay)';sbSetIndicator('err');}
+  }catch(e){msg.textContent='❌ Sin conexión — revisa la URL';msg.style.color='var(--clay)';sbSetIndicator('err');}
+}
+
+function copySQLSchema(){
+  const txt=document.getElementById('sql-schema').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=event.target;btn.textContent='✅ Copiado';
+    setTimeout(()=>btn.textContent='📋 Copiar SQL',2000);
+  });
+}
+
+async function syncFromSupabase(){
+  if(!SB_URL||!SB_KEY){alert('Configura Supabase primero (⚙️ Supabase).');return;}
+  const btn=document.getElementById('sync-btn');
+  const status=document.getElementById('sync-status');
+  btn.disabled=true;btn.textContent='⏳ Sincronizando…';status.textContent='';
+  try{
+    const [rpds,vhs,expos,ecs,rxs]=await Promise.all([
+      sbFetchAll('rpd_records'),sbFetchAll('vh_records'),
+      sbFetchAll('expo_records'),sbFetchAll('ec_records'),sbFetchAll('rx_records')
+    ]);
+    if(rpds) localStorage.setItem(RPD_KEY,JSON.stringify(rpds.map(r=>({
+      id:r.id,type:'rpd',datetime:r.datetime,context:r.context,situation:r.situation,
+      emotions:r.emotions,thoughts:r.thoughts,belief:r.belief,distortions:r.distortions,
+      evidenceFor:r.evidence_for,evidenceAgainst:r.evidence_against,alternative:r.alternative,
+      altBelief:r.alt_belief,reflection:r.reflection,action:r.action
+    }))));
+    if(vhs) localStorage.setItem(VH_KEY,JSON.stringify(vhs.map(r=>({
+      id:r.id,type:'vh',date:r.date,emotion:r.emotion,event:r.event,
+      interpretations:r.interpretations,threat:r.threat,catastrophe:r.catastrophe,
+      wiseMind:r.wise_mind,congruence:r.congruence
+    }))));
+    if(expos) localStorage.setItem(EXPO_KEY,JSON.stringify(expos.map(r=>({...r,type:'expo'}))));
+    if(ecs) localStorage.setItem(EC_KEY,JSON.stringify(ecs.map(r=>({
+      id:r.id,type:'ec',date:r.date,belief:r.belief,context:r.context,
+      prediction:r.prediction,behavior:r.behavior,observation:r.observation,
+      fulfilled:r.fulfilled,learning:r.learning,reformulation:r.reformulation,
+      beliefPre:r.belief_pre,beliefPost:r.belief_post
+    }))));
+    if(rxs) localStorage.setItem(RX_KEY,JSON.stringify(rxs.map(r=>({...r,type:'rx'}))));
+    const total=(rpds?.length||0)+(vhs?.length||0)+(expos?.length||0)+(ecs?.length||0)+(rxs?.length||0);
+    status.textContent=`✅ ${total} registros sincronizados`;status.style.color='var(--sage)';
+    btn.textContent='✅ Sincronizado';sbSetIndicator('ok');
+    renderHistory();updateCounts();
+  }catch(e){
+    status.textContent='❌ Error al sincronizar';status.style.color='var(--clay)';
+    btn.textContent='☁️ Sync Supabase';
+  }
+  setTimeout(()=>{btn.textContent='☁️ Sync Supabase';btn.disabled=false;},3000);
+}
+
+// ══ NAV ══
+function setBNavActive(btn){document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
+function setNavTab(cls){document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));const el=document.querySelector('.'+cls);if(el)el.classList.add('active');}
+function showView(name){
+  stopAllBreath();
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  if(name==='welcome')updateCounts();
+  if(name==='history')renderHistory();
+  if(name==='verify')initVerify();
+  if(name==='relax')closeRx();
+  if(name==='expo')initExpoView();
+  if(name==='ec')initEC();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function updateCounts(){
+  document.getElementById('count-rpd').textContent=getRPD().length;
+  document.getElementById('count-vh').textContent=getVH().length;
+  document.getElementById('count-expo').textContent=getExpo().length+getEC().length;
+  document.getElementById('count-rx').textContent=getRX().length;
+}
+
+// ══ RPD ══
+let currentStep=0;const TOTAL_STEPS=7;
+let selectedEmotions=[],selectedDistortions=[],emotionIntensities={},resultIntensities={};
+function startNew(){resetForm();currentStep=0;document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById('view-form').classList.add('active');setNavTab('tab-rpd');renderStep(0);window.scrollTo({top:0,behavior:'smooth'});}
+function renderStep(n){
+  document.querySelectorAll('#view-form .panel').forEach((p,i)=>p.classList.toggle('active',i===n));
+  const steps=document.querySelectorAll('#progress-steps .step-item');
+  steps.forEach((s,i)=>{s.classList.remove('active','done');if(i<n)s.classList.add('done');if(i===n)s.classList.add('active');s.querySelector('.step-dot').textContent=i<n?'✓':i+1;});
+  document.getElementById('progress-fill').style.width=(n/(TOTAL_STEPS-1)*100)+'%';
+  if(n===6)buildResultIntensitySliders();
+}
+function nextStep(){if(currentStep<TOTAL_STEPS-1){currentStep++;renderStep(currentStep);window.scrollTo({top:0,behavior:'smooth'});}}
+function prevStep(){if(currentStep>0){currentStep--;renderStep(currentStep);window.scrollTo({top:0,behavior:'smooth'});}}
+function goToStep(n){if(n<=currentStep){currentStep=n;renderStep(n);}}
+function toggleEmotion(btn,name){const idx=selectedEmotions.indexOf(name);if(idx>-1){selectedEmotions.splice(idx,1);delete emotionIntensities[name];btn.classList.remove('selected');}else{selectedEmotions.push(name);emotionIntensities[name]=50;btn.classList.add('selected');}updateIntensityBlock();}
+function updateIntensityBlock(){const block=document.getElementById('intensity-block'),sliders=document.getElementById('intensity-sliders');if(!selectedEmotions.length){block.style.display='none';return;}block.style.display='block';sliders.innerHTML=selectedEmotions.map(e=>`<div class="emotion-intensity-row"><div class="emo-name">${e}</div><div class="emo-bar-wrap"><div class="emo-bar-bg"></div><div class="emo-bar-fill" id="emo-fill-${e.replace(/\s/g,'_')}" style="width:${emotionIntensities[e]}%"></div><input type="range" class="emo-range" min="0" max="100" value="${emotionIntensities[e]}" oninput="updateEmoIntensity('${e}',this.value)"></div><div class="emo-val" id="emo-val-${e.replace(/\s/g,'_')}">${emotionIntensities[e]}</div></div>`).join('');}
+function updateEmoIntensity(name,val){emotionIntensities[name]=parseInt(val);const k=name.replace(/\s/g,'_');document.getElementById('emo-fill-'+k).style.width=val+'%';document.getElementById('emo-val-'+k).textContent=val;}
+function toggleDistortion(btn,name){const idx=selectedDistortions.indexOf(name);if(idx>-1){selectedDistortions.splice(idx,1);btn.classList.remove('selected');}else{selectedDistortions.push(name);btn.classList.add('selected');}}
+function updateSlider(fillId,valId,val){const f=document.getElementById(fillId),v=document.getElementById(valId);if(f)f.style.width=val+'%';if(v)v.textContent=val+(valId.includes('val')?'%':'');}
+function buildResultIntensitySliders(){const block=document.getElementById('result-intensity-block');if(!selectedEmotions.length){block.innerHTML='<p style="font-size:12px;color:var(--stone);font-style:italic;">No seleccionaste emociones.</p>';return;}selectedEmotions.forEach(e=>{if(resultIntensities[e]===undefined)resultIntensities[e]=Math.max(0,(emotionIntensities[e]||50)-20);});block.innerHTML=selectedEmotions.map(e=>`<div class="emotion-intensity-row"><div class="emo-name">${e}</div><div class="emo-bar-wrap"><div class="emo-bar-bg"></div><div class="emo-bar-fill" id="res-fill-${e.replace(/\s/g,'_')}" style="width:${resultIntensities[e]}%"></div><input type="range" class="emo-range" min="0" max="100" value="${resultIntensities[e]}" oninput="updateResIntensity('${e}',this.value)"></div><div class="emo-val" id="res-val-${e.replace(/\s/g,'_')}">${resultIntensities[e]}</div></div>`).join('');}
+function updateResIntensity(name,val){resultIntensities[name]=parseInt(val);const k=name.replace(/\s/g,'_');document.getElementById('res-fill-'+k).style.width=val+'%';document.getElementById('res-val-'+k).textContent=val;}
+
+async function saveRPDRecord(){
+  const rec={id:Date.now(),type:'rpd',datetime:document.getElementById('f-datetime').value,context:document.getElementById('f-context').value,situation:document.getElementById('f-situation').value,emotions:selectedEmotions.map(e=>({name:e,before:emotionIntensities[e]||50,after:resultIntensities[e]!==undefined?resultIntensities[e]:Math.max(0,(emotionIntensities[e]||50)-20)})),thoughts:document.getElementById('f-thoughts').value,belief:document.getElementById('f-belief').value,distortions:[...selectedDistortions],evidenceFor:document.getElementById('f-evidence-for').value,evidenceAgainst:document.getElementById('f-evidence-against').value,alternative:document.getElementById('f-alternative').value,altBelief:document.getElementById('f-alt-belief').value,reflection:document.getElementById('f-reflection').value,action:document.getElementById('f-action').value};
+  const recs=getRPD();recs.unshift(rec);await saveArr(RPD_KEY,recs);
+  // Supabase (fire & forget)
+  sbInsert('rpd_records',{id:rec.id,datetime:rec.datetime,context:rec.context,situation:rec.situation,emotions:rec.emotions,thoughts:rec.thoughts,belief:rec.belief,distortions:rec.distortions,evidence_for:rec.evidenceFor,evidence_against:rec.evidenceAgainst,alternative:rec.alternative,alt_belief:rec.altBelief,reflection:rec.reflection,action:rec.action});
+  renderRPDSummary(rec);showView('summary');setBNavActive(document.querySelector('.b-history'));
+}
+
+function resetForm(){selectedEmotions=[];selectedDistortions=[];emotionIntensities={};resultIntensities={};const now=new Date(),pad=n=>String(n).padStart(2,'0');const el=document.getElementById('f-datetime');if(el)el.value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;['f-context','f-situation','f-thoughts','f-evidence-for','f-evidence-against','f-alternative','f-reflection','f-action'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});document.getElementById('f-belief').value=50;document.getElementById('f-alt-belief').value=70;updateSlider('belief-fill','belief-val',50);updateSlider('alt-belief-fill','alt-belief-val',70);document.querySelectorAll('.emotion-chip').forEach(c=>c.classList.remove('selected'));document.querySelectorAll('.distortion-card').forEach(c=>c.classList.remove('selected'));document.getElementById('intensity-block').style.display='none';document.getElementById('intensity-sliders').innerHTML='';}
+function renderRPDSummary(rec){const fmt=rec.datetime?new Date(rec.datetime).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'}):'—';const ePills=(rec.emotions||[]).map(e=>`<span class="emotion-pill">${e.name} <strong>${e.before}→${e.after}</strong></span>`).join('');const dPills=(rec.distortions||[]).map(d=>`<span class="distortion-pill">${d}</span>`).join('')||'<span style="color:var(--stone);font-size:12px;">Ninguna</span>';document.getElementById('summary-label').textContent='POKEDEX · RPD';document.getElementById('summary-content').innerHTML=`<div class="result-hero"><h2>RPD — ${fmt}</h2><p>Registro de Pensamientos Disfuncionales completado.</p></div><div class="summary-grid"><div class="summary-block full"><div class="summary-block-label">📍 Situación</div><div class="summary-block-value">${rec.situation||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">💔 Emociones (antes→después)</div><div class="summary-block-value">${ePills||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">💭 Pensamientos (creencia: ${rec.belief}%)</div><div class="summary-block-value" style="white-space:pre-line;">${rec.thoughts||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">🔍 Distorsiones</div><div class="summary-block-value">${dPills}</div></div></div><div class="before-after"><div class="before-card"><div class="ba-label">⚖️ A favor</div><div class="ba-value" style="white-space:pre-line;">${rec.evidenceFor||'—'}</div></div><div class="after-card"><div class="ba-label">⚖️ En contra</div><div class="ba-value" style="white-space:pre-line;">${rec.evidenceAgainst||'—'}</div></div></div><div class="summary-grid" style="margin-top:.875rem;"><div class="summary-block full"><div class="summary-block-label">🌱 Alternativa (creencia: ${rec.altBelief}%)</div><div class="summary-block-value">${rec.alternative||'—'}</div></div><div class="summary-block"><div class="summary-block-label">💡 Reflexión</div><div class="summary-block-value">${rec.reflection||'—'}</div></div><div class="summary-block"><div class="summary-block-label">🎯 Acción</div><div class="summary-block-value">${rec.action||'—'}</div></div></div>`;}
+
+// ══ VH ══
+let vhCompleted=[];
+function initVerify(){vhCompleted=[];document.querySelectorAll('.vh-step').forEach(s=>s.classList.remove('open','completed'));document.querySelectorAll('.vh-prog-dot').forEach(d=>d.classList.remove('done'));document.querySelectorAll('.vh-step-num').forEach((n,i)=>n.textContent=i+1);document.getElementById('vh-result-bar').style.display='none';['vh-event','vh-interp','vh-threat','vh-catastro','vh-wise'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.querySelectorAll('.vh-emo-chip').forEach(c=>c.classList.remove('sel'));document.querySelectorAll('input[name="vh-congru"]').forEach(r=>r.checked=false);document.getElementById('vh-s1').classList.add('open');}
+function vhToggle(n){document.getElementById('vh-s'+n).classList.toggle('open');}
+function vhMarkDone(n){const step=document.getElementById('vh-s'+n);step.classList.remove('open');step.classList.add('completed');step.querySelector('.vh-step-num').textContent='✓';if(!vhCompleted.includes(n))vhCompleted.push(n);const dot=document.getElementById('vh-dot-'+n);if(dot)dot.classList.add('done');const next=document.getElementById('vh-s'+(n+1));if(next){next.classList.add('open');next.scrollIntoView({behavior:'smooth',block:'start'});}if(vhCompleted.length===6){document.getElementById('vh-result-bar').style.display='block';document.getElementById('vh-result-bar').scrollIntoView({behavior:'smooth',block:'start'});}}
+function vhToggleEmo(btn){btn.classList.toggle('sel');}
+async function saveVHRecord(){
+  const rec={id:Date.now(),type:'vh',date:new Date().toISOString(),emotion:[...document.querySelectorAll('#vh-emo-chips .vh-emo-chip.sel')].map(b=>b.textContent.trim()).join(', '),event:document.getElementById('vh-event')?.value||'',interpretations:document.getElementById('vh-interp')?.value||'',threat:document.getElementById('vh-threat')?.value||'',catastrophe:document.getElementById('vh-catastro')?.value||'',wiseMind:document.getElementById('vh-wise')?.value||'',congruence:document.querySelector('input[name="vh-congru"]:checked')?.value||''};
+  const recs=getVH();recs.unshift(rec);await saveArr(VH_KEY,recs);
+  sbInsert('vh_records',{id:rec.id,date:rec.date,emotion:rec.emotion,event:rec.event,interpretations:rec.interpretations,threat:rec.threat,catastrophe:rec.catastrophe,wise_mind:rec.wiseMind,congruence:rec.congruence});
+  vhMarkDone(6);setTimeout(()=>{renderVHSummary(rec);showView('summary');setBNavActive(document.querySelector('.b-history'));},700);
+}
+function renderVHSummary(rec){const fmt=rec.date?new Date(rec.date).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'}):'—';const cm={si:'✅ Proporcionales',parcial:'⚠️ Parcialmente desproporcionada',no:'❌ No concuerdan'};document.getElementById('summary-label').textContent='POKEDEX · Verificar Hechos';document.getElementById('summary-content').innerHTML=`<div class="vh-summary-hero"><div style="font-size:2rem;margin-bottom:6px;">🔎</div><h2>Verificación — ${fmt}</h2><p>6 pasos completados.</p></div><div class="summary-grid"><div class="summary-block"><div class="summary-block-label">💔 Emoción</div><div class="summary-block-value">${rec.emotion||'—'}</div></div><div class="summary-block"><div class="summary-block-label">⚖️ Congruencia</div><div class="summary-block-value">${cm[rec.congruence]||rec.congruence||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">📍 Evento</div><div class="summary-block-value">${rec.event||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">🧘 Mente Sabia</div><div class="summary-block-value">${rec.wiseMind||'—'}</div></div></div>`;}
+
+// ══ JERARQUÍA EXPOSICIÓN ══
+let ladderItems=[],selectedSuds=null,currentAttemptItemId=null;
+function initExpoView(){renderLadder();}
+function selectSuds(btn,val){document.querySelectorAll('.suds-chip').forEach(c=>c.classList.remove('sel'));btn.classList.add('sel');selectedSuds=val;const lbl=document.getElementById('suds-selected-label');if(lbl)lbl.textContent='SUDS: '+val;}
+function toggleAddForm(){const f=document.getElementById('add-item-form');f.style.display=f.style.display==='none'?'block':'none';if(f.style.display==='block'){document.getElementById('new-item-text').value='';selectedSuds=null;document.querySelectorAll('.suds-chip').forEach(c=>c.classList.remove('sel'));const lbl=document.getElementById('suds-selected-label');if(lbl)lbl.textContent='SUDS: —';document.querySelectorAll('input[name="item-type"]')[0].checked=true;}}
+function addLadderItem(){const txt=document.getElementById('new-item-text').value.trim();if(!txt){alert('Escribe una descripción.');return;}if(!selectedSuds){alert('Selecciona un nivel SUDS.');return;}const type=document.querySelector('input[name="item-type"]:checked')?.value||'in-vivo';ladderItems.push({id:Date.now(),text:txt,suds:selectedSuds,type,status:'pending',attempts:[]});ladderItems.sort((a,b)=>a.suds-b.suds);renderLadder();toggleAddForm();}
+function renderLadder(){const container=document.getElementById('expo-ladder');if(!ladderItems.length){container.innerHTML='<div class="empty-state" id="ladder-empty"><div class="empty-icon">🪜</div><p>Tu escalera está vacía.<br>Agrega peldaños con el botón de arriba.</p></div>';return;}const typeLabels={'in-vivo':'🌍 In vivo',imagineria:'💭 Imaginería',interoceptivo:'💓 Interoceptivo','role-play':'🎭 Role play'};const statusLabels={pending:'⏳ Pendiente','in-progress':'🔄 En progreso',done:'✅ Completado'};container.innerHTML=ladderItems.map((item)=>{const sudsClass=item.suds<=25?'suds-0-25':item.suds<=50?'suds-26-50':item.suds<=75?'suds-51-75':'suds-76-100';const attCount=item.attempts?item.attempts.length:0;return `<div class="ladder-item ${item.status==='done'?'done':item.status==='in-progress'?'in-progress':''}" id="li-${item.id}"><div class="ladder-rung"><div class="ladder-suds"><div class="suds-num ${sudsClass}">${item.suds}</div><div class="suds-label">SUDS</div></div><div class="ladder-divider"></div><div class="ladder-content"><div class="ladder-situation">${item.text}</div><div class="ladder-meta"><span class="ladder-badge lb-${item.status==='done'?'done':item.status==='in-progress'?'progress':'pending'}">${statusLabels[item.status]||'⏳'}</span><span class="ladder-badge" style="background:var(--teal-light);color:#2d7a84;">${typeLabels[item.type]||item.type}</span>${attCount?`<span class="ladder-badge lb-attempts">🔄 ${attCount} intento${attCount>1?'s':''}</span>`:''}</div>${item.attempts&&item.attempts.length?`<div class="attempt-list">${item.attempts.slice(-2).map(a=>`<div class="attempt-row"><div class="attempt-row-header"><span class="attempt-row-date">${new Date(a.date).toLocaleDateString('es-MX')}</span><div class="attempt-row-suds"><span class="suds-pair">Ant <span>${a.ant}</span></span><span class="suds-pair">Pico <span>${a.real}</span></span><span class="suds-pair">Fin <span>${a.end}</span></span></div></div>${a.notes?`<div class="attempt-row-notes">${a.notes}</div>`:''}</div>`).join('')}</div>`:''}</div><div class="ladder-actions"><button class="icon-btn gold" title="Registrar intento" onclick="openAttemptModal(${item.id})">▶</button><button class="icon-btn" title="Marcar estado" onclick="cycleLadderStatus(${item.id})">🔄</button><button class="icon-btn danger" title="Eliminar" onclick="deleteLadderItem(${item.id})">✕</button></div></div></div>`;}).join('');}
+function cycleLadderStatus(id){const item=ladderItems.find(i=>i.id===id);if(!item)return;const cycle={pending:'in-progress','in-progress':'done',done:'pending'};item.status=cycle[item.status]||'pending';renderLadder();}
+function deleteLadderItem(id){if(confirm('¿Eliminar este peldaño?')){ladderItems=ladderItems.filter(i=>i.id!==id);renderLadder();}}
+function openAttemptModal(itemId){const item=ladderItems.find(i=>i.id===itemId);if(!item)return;currentAttemptItemId=itemId;document.getElementById('modal-title').textContent='Registrar intento';document.getElementById('modal-situation').textContent=`"${item.text}" (SUDS estimado: ${item.suds})`;const now=new Date(),pad=n=>String(n).padStart(2,'0');document.getElementById('attempt-date').value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;document.getElementById('attempt-ant').value=item.suds;document.getElementById('attempt-real').value=item.suds;document.getElementById('attempt-end').value=Math.max(0,item.suds-20);updateSlider('ant-fill','ant-val',item.suds);updateSlider('real-fill','real-val',item.suds);updateSlider('end-fill','end-val',Math.max(0,item.suds-20));document.getElementById('attempt-notes').value='';document.querySelectorAll('input[name="attempt-completed"]')[0].checked=true;document.getElementById('attempt-overlay').classList.add('open');}
+function closeAttemptModal(e,force){if(force||e.target===document.getElementById('attempt-overlay')){document.getElementById('attempt-overlay').classList.remove('open');currentAttemptItemId=null;}}
+function saveAttempt(){if(!currentAttemptItemId)return;const item=ladderItems.find(i=>i.id===currentAttemptItemId);if(!item)return;const att={id:Date.now(),date:document.getElementById('attempt-date').value||new Date().toISOString(),ant:parseInt(document.getElementById('attempt-ant').value),real:parseInt(document.getElementById('attempt-real').value),end:parseInt(document.getElementById('attempt-end').value),completed:document.querySelector('input[name="attempt-completed"]:checked')?.value||'si',notes:document.getElementById('attempt-notes').value};if(!item.attempts)item.attempts=[];item.attempts.push(att);if(att.completed==='si')item.status='done';else if(att.completed==='parcial')item.status='in-progress';renderLadder();closeAttemptModal(null,true);}
+
+async function saveExpoHierarchy(){
+  if(!ladderItems.length){alert('Agrega al menos un peldaño.');return;}
+  const rec={id:Date.now(),type:'expo',date:new Date().toISOString(),name:document.getElementById('expo-name').value||'Sin nombre',fear:document.getElementById('expo-fear').value||'',items:[...ladderItems]};
+  const recs=getExpo();recs.unshift(rec);await saveArr(EXPO_KEY,recs);
+  sbInsert('expo_records',{id:rec.id,date:rec.date,name:rec.name,fear:rec.fear,items:rec.items});
+  updateCounts();alert('✓ Jerarquía guardada.');
+}
+
+function loadExpoFromStorage(){  const recs=getExpo();if(!recs.length){alert('No hay jerarquías guardadas.');return;}const latest=recs[0];document.getElementById('expo-name').value=latest.name||'';document.getElementById('expo-fear').value=latest.fear||'';ladderItems=[...(latest.items||[])];renderLadder();}
+function resetExpo(){if(confirm('¿Crear una jerarquía nueva?')){ladderItems=[];document.getElementById('expo-name').value='';document.getElementById('expo-fear').value='';renderLadder();}}
+
+// ══ EXPERIMENTO CONDUCTUAL ══
+let ecCompleted=[];
+function initEC(){ecCompleted=[];document.querySelectorAll('.ec-phase').forEach(p=>p.classList.remove('active-phase','done-phase'));document.querySelectorAll('.ec-phase .ec-phase-num').forEach((n,i)=>n.textContent=i+1);document.getElementById('ec-result-bar').style.display='none';['ec-belief','ec-context','ec-prediction','ec-indicators','ec-behavior','ec-obstacles','ec-observation','ec-what-happened','ec-learning','ec-reformulation','ec-next'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.getElementById('ec-belief-pre').value=80;updateSlider('ec-bef-fill','ec-bef-val',80);document.getElementById('ec-belief-post').value=40;updateECPost(40);document.querySelectorAll('input[name="ec-fulfilled"]').forEach(r=>r.checked=false);const now=new Date(),pad=n=>String(n).padStart(2,'0');const pd=document.getElementById('ec-planned-date');if(pd)pd.value=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}T${pad(now.getHours())}:${pad(now.getMinutes())}`;document.getElementById('ec-p1').classList.add('active-phase');renderECDots();}
+function renderECDots(){const c=document.getElementById('ec-prog-dots');if(!c)return;c.innerHTML=Array.from({length:5},(_,i)=>`<div class="vh-prog-dot ${ecCompleted.includes(i+1)?'done':''}" id="ec-dot-${i+1}"></div>`).join('');}
+function ecToggle(n){const p=document.getElementById('ec-p'+n);p.classList.toggle('active-phase');}
+function ecMarkDone(n){const p=document.getElementById('ec-p'+n);p.classList.remove('active-phase');p.classList.add('done-phase');p.querySelector('.ec-phase-num').textContent='✓';if(!ecCompleted.includes(n))ecCompleted.push(n);const dot=document.getElementById('ec-dot-'+n);if(dot)dot.classList.add('done');const next=document.getElementById('ec-p'+(n+1));if(next){next.classList.add('active-phase');next.scrollIntoView({behavior:'smooth',block:'start'});}if(n===2){const pred=document.getElementById('ec-prediction')?.value||'—';const s=document.getElementById('ec-pred-summary');if(s)s.textContent=pred;}if(n===3){const pre=document.getElementById('ec-belief-pre')?.value||80;const d=document.getElementById('ec-pre-display');if(d)d.textContent=pre+'%';}}
+function updateECPost(val){document.getElementById('ec-aft-fill').style.width=val+'%';document.getElementById('ec-post-val').textContent=val+'%';}
+
+async function saveECRecord(){
+  const rec={id:Date.now(),type:'ec',date:new Date().toISOString(),belief:document.getElementById('ec-belief')?.value||'',context:document.getElementById('ec-context')?.value||'',prediction:document.getElementById('ec-prediction')?.value||'',behavior:document.getElementById('ec-behavior')?.value||'',observation:document.getElementById('ec-observation')?.value||'',fulfilled:document.querySelector('input[name="ec-fulfilled"]:checked')?.value||'',learning:document.getElementById('ec-learning')?.value||'',reformulation:document.getElementById('ec-reformulation')?.value||'',beliefPre:document.getElementById('ec-belief-pre')?.value||80,beliefPost:document.getElementById('ec-belief-post')?.value||40};
+  const recs=getEC();recs.unshift(rec);await saveArr(EC_KEY,recs);
+  sbInsert('ec_records',{id:rec.id,date:rec.date,belief:rec.belief,context:rec.context,prediction:rec.prediction,behavior:rec.behavior,observation:rec.observation,fulfilled:rec.fulfilled,learning:rec.learning,reformulation:rec.reformulation,belief_pre:parseInt(rec.beliefPre),belief_post:parseInt(rec.beliefPost)});
+  document.getElementById('ec-result-bar').style.display='block';document.getElementById('ec-result-bar').scrollIntoView({behavior:'smooth',block:'start'});updateCounts();
+}
+
+// ══ HISTORY ══
+function switchHistoryTab(panelId,btn){document.querySelectorAll('.history-tab-panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.history-tab').forEach(b=>b.classList.remove('active'));document.getElementById(panelId).classList.add('active');btn.classList.add('active');}
+function renderHistory(){const rpds=getRPD(),vhs=getVH(),rxs=getRX(),expos=getExpo(),ecs=getEC();const all=[...rpds.map(r=>({...r,_type:'rpd'})),...vhs.map(r=>({...r,_type:'vh',datetime:r.date})),...rxs.map(r=>({...r,_type:'rx',datetime:r.date})),...expos.map(r=>({...r,_type:'expo',datetime:r.date})),...ecs.map(r=>({...r,_type:'ec',datetime:r.date}))].sort((a,b)=>b.id-a.id);document.getElementById('history-all').innerHTML=renderHistoryList(all,true);document.getElementById('history-rpd-list').innerHTML=renderHistoryList(rpds.map(r=>({...r,_type:'rpd'})),false);document.getElementById('history-vh-list').innerHTML=renderHistoryList(vhs.map(r=>({...r,_type:'vh',datetime:r.date})),false);document.getElementById('history-expo-list').innerHTML=renderHistoryList(expos.map(r=>({...r,_type:'expo',datetime:r.date})),false);document.getElementById('history-ec-list').innerHTML=renderHistoryList(ecs.map(r=>({...r,_type:'ec',datetime:r.date})),false);document.getElementById('history-rx-list').innerHTML=renderHistoryList(rxs.map(r=>({...r,_type:'rx',datetime:r.date})),false);}
+function renderHistoryList(items,showBadge){if(!items.length)return`<div class="empty-state"><div class="empty-icon">📝</div><p>No hay registros aquí todavía.</p></div>`;return`<div class="history-list">`+items.map(r=>{const dt=r.datetime||r.date||'';const fmt=dt?new Date(dt).toLocaleString('es-MX',{dateStyle:'short',timeStyle:'short'}):'Sin fecha';const isRPD=r._type==='rpd',isVH=r._type==='vh',isRX=r._type==='rx',isExpo=r._type==='expo',isEC=r._type==='ec';const title=isRPD?(r.situation?r.situation.substring(0,60)+(r.situation.length>60?'…':''):'(sin situación)'):isVH?(r.event?r.event.substring(0,60)+(r.event.length>60?'…':''):'(sin evento)'):isExpo?(r.name||'Jerarquía'):isEC?(r.belief?r.belief.substring(0,60)+'…':'Experimento'):(r.technique||'Sesión');const badgeMap={rpd:'badge-rpd',vh:'badge-vh',rx:'badge-rx',expo:'badge-expo',ec:'badge-ec'};const badgeLabel={rpd:'RPD',vh:'VH',rx:'🫁',expo:'🪜 Expo',ec:'🔬 EC'};const badge=showBadge?`<span class="history-type-badge ${badgeMap[r._type]}">${badgeLabel[r._type]}</span>`:'';const pills=isRPD?(r.emotions||[]).slice(0,2).map(e=>`<span class="emotion-pill" style="font-size:10px;">${e.name}</span>`).join(''):isVH?(r.emotion?`<span class="distortion-pill" style="font-size:10px;">${r.emotion}</span>`:''):isExpo?`<span class="tag tag-gold" style="font-size:10px;">📍 ${(r.items||[]).length} peldaños</span>`:isEC?`<span class="tag tag-lavender" style="font-size:10px;">${r.beliefPre}%→${r.beliefPost}%</span>`:`<span class="tag tag-teal" style="font-size:10px;">🫁 ${r.duration||0}min</span>`;const onclick=isRPD?`viewRPDRecord(${r.id})`:isVH?`viewVHRecord(${r.id})`:isExpo?`viewExpoRecord(${r.id})`:isEC?`viewECRecord(${r.id})`:`viewRXRecord(${r.id})`;return`<div class="history-item ${isVH?'vh-item':isRX?'rx-item':isExpo?'expo-item':isEC?'ec-item':''}" onclick="${onclick}"><div class="history-item-left"><div class="history-date">${fmt} ${badge}</div><div class="history-situation">${title}</div><div class="history-emotions">${pills}</div></div><div class="history-arrow">›</div></div>`;}).join('')+`</div>`;}
+function viewRPDRecord(id){const rec=getRPD().find(r=>r.id===id);if(rec){renderRPDSummary(rec);showView('summary');}}
+function viewVHRecord(id){const rec=getVH().find(r=>r.id===id);if(rec){renderVHSummary(rec);showView('summary');}}
+function viewRXRecord(id){const rec=getRX().find(r=>r.id===id);if(!rec)return;document.getElementById('summary-label').textContent='POKEDEX · Desactivación';document.getElementById('summary-content').innerHTML=`<div class="vh-summary-hero" style="background:linear-gradient(135deg,var(--teal-pale),var(--sage-pale));border-color:var(--teal-light);"><h2>${rec.technique}</h2><p>${new Date(rec.date).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'})}</p></div><div class="summary-grid"><div class="summary-block"><div class="summary-block-label">⏱️ Duración</div><div class="summary-block-value">${rec.duration} minutos</div></div></div>`;showView('summary');}
+function viewExpoRecord(id){const rec=getExpo().find(r=>r.id===id);if(!rec)return;const fmt=new Date(rec.date).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'});document.getElementById('summary-label').textContent='POKEDEX · Jerarquía de Exposición';document.getElementById('summary-content').innerHTML=`<div class="result-hero" style="background:linear-gradient(135deg,var(--gold-pale),var(--amber-light));border-color:var(--gold-light);"><div style="font-size:2rem;margin-bottom:6px;">🪜</div><h2>${rec.name}</h2><p>${fmt}</p></div><div class="summary-grid"><div class="summary-block full"><div class="summary-block-label">🎯 Miedo / creencia</div><div class="summary-block-value">${rec.fear||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">📍 Peldaños (${(rec.items||[]).length})</div><div class="summary-block-value">${(rec.items||[]).map(i=>`<div style="margin-bottom:4px;"><span class="tag tag-gold" style="margin-right:4px;">SUDS ${i.suds}</span>${i.text}</div>`).join('')}</div></div></div>`;showView('summary');}
+function viewECRecord(id){const rec=getEC().find(r=>r.id===id);if(!rec)return;const fmt=new Date(rec.date).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'});const fMap={si:'❌ Sí se cumplió',parcial:'⚠️ Parcialmente',no:'✅ No se cumplió'};document.getElementById('summary-label').textContent='POKEDEX · Experimento Conductual';document.getElementById('summary-content').innerHTML=`<div class="vh-summary-hero" style="background:linear-gradient(135deg,var(--lavender-pale),var(--sage-pale));border-color:var(--lavender-light);"><div style="font-size:2rem;margin-bottom:6px;">🔬</div><h2>Experimento — ${fmt}</h2><p>Creencia: ${rec.beliefPre}% → ${rec.beliefPost}%</p></div><div class="summary-grid"><div class="summary-block full"><div class="summary-block-label">💭 Creencia probada</div><div class="summary-block-value">${rec.belief||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">⚗️ Conducta realizada</div><div class="summary-block-value">${rec.behavior||'—'}</div></div><div class="summary-block"><div class="summary-block-label">📋 Predicción cumplida</div><div class="summary-block-value">${fMap[rec.fulfilled]||rec.fulfilled||'—'}</div></div><div class="summary-block"><div class="summary-block-label">📉 Cambio en creencia</div><div class="summary-block-value" style="font-family:var(--font-display);font-size:1.5rem;">${rec.beliefPre}% → <span style="color:var(--sage);">${rec.beliefPost}%</span></div></div><div class="summary-block full"><div class="summary-block-label">🔬 Aprendizaje</div><div class="summary-block-value">${rec.learning||'—'}</div></div><div class="summary-block full"><div class="summary-block-label">🌱 Reformulación</div><div class="summary-block-value">${rec.reformulation||'—'}</div></div></div>`;showView('summary');}
+
+// ══ DESACTIVACIÓN ══
+function openRx(id){document.querySelectorAll('.rx-panel').forEach(p=>p.classList.remove('active'));document.getElementById('rx-'+id).classList.add('active');if(id==='pmr')initPMR();if(id==='scan')initScan();if(id==='grounding')initGrounding();window.scrollTo({top:0,behavior:'smooth'});}
+function closeRx(){stopAllBreath();document.querySelectorAll('.rx-panel').forEach(p=>p.classList.remove('active'));document.getElementById('rx-home').classList.add('active');}
+function saveRXSession(technique,duration,cycles){
+  const rec={id:Date.now(),type:'rx',date:new Date().toISOString(),technique,duration:Math.round(duration/60),cycles};
+  const recs=getRX();recs.unshift(rec);saveArr(RX_KEY,recs);
+  sbInsert('rx_records',{id:rec.id,date:rec.date,technique:rec.technique,duration:rec.duration,cycles:rec.cycles});
+}
+
+// BREATHING
+const breathState={};
+const patterns={diaf:{current:[4,6,0,0],names:['Inhala…','Retén…','Exhala…','Retén…']},ball:{current:[4,0,6,0],names:['Inhala…','','Exhala…','']},box:{current:[4,4,4,4],names:['Inhala…','Retén…','Exhala…','Retén…']}};
+function setBreathPattern(btn,i,h1,e,h2){patterns.diaf.current=[i,h1,e,h2];document.querySelectorAll('.bp-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel');}
+function toggleBreath(key){if(breathState[key]&&breathState[key].running){stopBreath(key);}else{startBreath(key);}}
+function stopAllBreath(){Object.keys(breathState).forEach(k=>stopBreath(k));}
+function stopBreath(key){const s=breathState[key];if(!s)return;s.running=false;clearInterval(s.interval);clearInterval(s.timerInterval);const btn=document.getElementById(key+'Btn');if(btn){btn.textContent='▶ Iniciar';btn.classList.remove('stop');}if(key==='diaf'){const c=document.getElementById('diafCircle');if(c)c.style.transform='scale(1)';document.getElementById('diafText').textContent='Listo';document.getElementById('diafPhase').textContent='Presiona iniciar';document.getElementById('diafProgress').style.strokeDashoffset=565;}if(key==='ball')resetBalloon();if(key==='box'){const d=document.getElementById('boxDot');if(d){d.style.top='10px';d.style.left='10px';}document.getElementById('boxCenterText').textContent='Listo';}}
+function startBreath(key){const s=breathState[key]={running:true,cycles:0,elapsed:0};const btn=document.getElementById(key+'Btn');btn.textContent='⏹ Detener';btn.classList.add('stop');const pat=patterns[key]?patterns[key].current:[4,0,6,0];const phaseNames=patterns[key]?patterns[key].names:['Inhala…','','Exhala…',''];const phases=pat.map((d,i)=>({dur:d,name:phaseNames[i],idx:i})).filter(p=>p.dur>0);s.timerInterval=setInterval(()=>{s.elapsed++;const m=Math.floor(s.elapsed/60),sec=s.elapsed%60;const pad=n=>String(n).padStart(2,'0');const el=document.getElementById(key+'Time');if(el)el.textContent=`${m}:${pad(sec)}`;},1000);let phaseIdx=0,phaseElapsed=0;s.interval=setInterval(()=>{if(!s.running)return;const phase=phases[phaseIdx];const phaseDur=phase.dur*1000;phaseElapsed+=100;const pct=Math.min(phaseElapsed/phaseDur,1);if(key==='diaf')animateDiaf(phase.idx,pct,phase.name);if(key==='ball')animateBalloon(phase.idx,pct,phase.name);if(key==='box')animateBox(phase.idx,pct,phase.name,pat);if(phaseElapsed>=phaseDur){phaseElapsed=0;phaseIdx=(phaseIdx+1)%phases.length;if(phaseIdx===0){s.cycles++;const el=document.getElementById(key+'Cycles');if(el)el.textContent=s.cycles;}}},100);}
+function animateDiaf(phaseIdx,pct,phaseName){const circle=document.getElementById('diafCircle'),text=document.getElementById('diafText'),phase=document.getElementById('diafPhase'),prog=document.getElementById('diafProgress');if(!circle)return;let scale=1;if(phaseIdx===0)scale=1+pct*.25;else if(phaseIdx===1)scale=1.25;else if(phaseIdx===2)scale=1.25-pct*.25;else scale=1;circle.style.transform=`scale(${scale})`;if(text.childNodes[0])text.childNodes[0].textContent=phaseName;if(phase)phase.textContent=phaseName;prog.style.strokeDashoffset=565*(1-pct);}
+function animateBalloon(phaseIdx,pct,phaseName){const body=document.getElementById('balloonBody'),lbl=document.getElementById('balloonLabel');if(!body)return;let rx,ry,cy;if(phaseIdx===0){rx=55+pct*30;ry=65+pct*35;cy=110-pct*15;}else{rx=85-pct*30;ry=100-pct*35;cy=95+pct*15;}body.setAttribute('rx',rx);body.setAttribute('ry',ry);body.setAttribute('cy',cy);if(lbl)lbl.textContent=phaseName;}
+function resetBalloon(){const body=document.getElementById('balloonBody');if(!body)return;body.setAttribute('rx',55);body.setAttribute('ry',65);body.setAttribute('cy',110);const lbl=document.getElementById('balloonLabel');if(lbl)lbl.textContent='Listo';const sub=document.getElementById('balloonSub');if(sub)sub.textContent='Presiona iniciar';}
+function animateBox(phaseIdx,pct,phaseName){const dot=document.getElementById('boxDot'),txt=document.getElementById('boxCenterText');if(!dot)return;const mn=10,mx=174;let top,left;if(phaseIdx===0){top=mn;left=mn+pct*(mx-mn);}else if(phaseIdx===1){top=mn+pct*(mx-mn);left=mx;}else if(phaseIdx===2){top=mx;left=mx-pct*(mx-mn);}else{top=mx-pct*(mx-mn);left=mn;}dot.style.top=top+'px';dot.style.left=left+'px';if(txt)txt.textContent=phaseName;}
+
+// PMR
+const pmrSteps=[{name:'Manos y antebrazos',zones:['pmr-lhand','pmr-rhand','pmr-larm','pmr-rarm'],tension:'Cierra los puños con fuerza durante 7 segundos.',release:'Suelta completamente. Siente el calor y la relajación.'},{name:'Bíceps y tríceps',zones:['pmr-larm','pmr-rarm'],tension:'Dobla los codos apretando los brazos hacia los hombros.',release:'Deja caer los brazos. Nota la diferencia.'},{name:'Hombros',zones:['pmr-shoulders'],tension:'Encoge los hombros hacia las orejas con fuerza.',release:'Deja caer los hombros completamente.'},{name:'Cuello',zones:['pmr-neck'],tension:'Presiona suavemente la cabeza hacia atrás.',release:'Relaja el cuello en su posición natural.'},{name:'Cara y frente',zones:['pmr-head'],tension:'Arruga toda la cara: cierra los ojos fuerte, frunce la frente.',release:'Deja que toda la cara se relaje.'},{name:'Pecho',zones:['pmr-chest'],tension:'Inhala profundamente y contén el aire tensando el pecho.',release:'Exhala lentamente. Siente el pecho abrirse.'},{name:'Abdomen',zones:['pmr-abdomen'],tension:'Aprieta los músculos del abdomen hacia adentro.',release:'Relaja completamente el abdomen.'},{name:'Glúteos y caderas',zones:['pmr-hips'],tension:'Aprieta los glúteos y tensiona las caderas.',release:'Suelta y siente los músculos pesados y relajados.'},{name:'Muslos',zones:['pmr-lthigh','pmr-rthigh'],tension:'Aprieta los muslos, presionando las rodillas juntas.',release:'Deja que los muslos caigan relajados.'},{name:'Pies y pantorrillas',zones:['pmr-lcalf','pmr-rcalf','pmr-feet'],tension:'Dobla los dedos de los pies hacia adentro y tensa las pantorrillas.',release:'Deja pies y pantorrillas completamente relajados.'}];
+let pmrRunning=false,pmrStep=0,pmrInterval=null,pmrElapsed=0,pmrPhase='idle';
+function initPMR(){pmrRunning=false;pmrStep=0;pmrElapsed=0;pmrPhase='idle';clearInterval(pmrInterval);document.getElementById('pmrBtn').textContent='▶ Iniciar';document.getElementById('pmrPhaseFill').style.width='0%';document.getElementById('pmrPhaseLabel').textContent='Presiona Iniciar';renderPMRStep();renderPMRList();document.querySelectorAll('.muscle-group').forEach(el=>el.className='muscle-group');}
+function renderPMRStep(){if(pmrStep>=pmrSteps.length)return;const s=pmrSteps[pmrStep];document.getElementById('pmrStepInd').textContent=`Paso ${pmrStep+1} de ${pmrSteps.length}`;document.getElementById('pmrStepTitle').textContent=s.name;document.getElementById('pmrInstruction').textContent=s.tension;}
+function renderPMRList(){document.getElementById('pmrStepsList').innerHTML=pmrSteps.map((s,i)=>`<div class="pmr-step-item ${i<pmrStep?'done':i===pmrStep?'current':''}" id="pmrli-${i}"><div class="pmr-step-dot"></div>${s.name}</div>`).join('');}
+function togglePMR(){if(pmrStep>=pmrSteps.length){initPMR();return;}if(pmrRunning){pmrRunning=false;clearInterval(pmrInterval);document.getElementById('pmrBtn').textContent='▶ Continuar';return;}pmrRunning=true;document.getElementById('pmrBtn').textContent='⏸ Pausar';runPMRPhase();}
+function runPMRPhase(){const TENSION=7,RELEASE=15;pmrPhase='tension';pmrElapsed=0;const step=pmrSteps[pmrStep];document.getElementById('pmrInstruction').textContent=step.tension;document.getElementById('pmrPhaseLabel').textContent='🔴 Tensiona — 7 segundos';step.zones.forEach(z=>{const el=document.getElementById(z);if(el)el.className='muscle-group tension';});clearInterval(pmrInterval);pmrInterval=setInterval(()=>{if(!pmrRunning)return;pmrElapsed++;if(pmrPhase==='tension'){document.getElementById('pmrPhaseFill').style.transition='width 1s linear';document.getElementById('pmrPhaseFill').style.width=(pmrElapsed/TENSION*100)+'%';document.getElementById('pmrPhaseFill').style.background='var(--clay)';if(pmrElapsed>=TENSION){pmrPhase='release';pmrElapsed=0;document.getElementById('pmrInstruction').textContent=pmrSteps[pmrStep].release;document.getElementById('pmrPhaseLabel').textContent='🟢 Suelta y relaja — 15 segundos';pmrSteps[pmrStep].zones.forEach(z=>{const el=document.getElementById(z);if(el)el.className='muscle-group release';});}}else{document.getElementById('pmrPhaseFill').style.background='var(--sage)';document.getElementById('pmrPhaseFill').style.width=(pmrElapsed/RELEASE*100)+'%';if(pmrElapsed>=RELEASE){pmrStep++;renderPMRList();if(pmrStep>=pmrSteps.length){clearInterval(pmrInterval);pmrRunning=false;document.getElementById('pmrStepTitle').textContent='¡Completado! 🌿';document.getElementById('pmrInstruction').textContent='Has relajado todos los grupos musculares.';document.getElementById('pmrPhaseLabel').textContent='Sesión completada';document.getElementById('pmrPhaseFill').style.width='100%';document.getElementById('pmrBtn').textContent='✓ Completado';saveRXSession('Relajación muscular progresiva',pmrSteps.length*(7+15),pmrSteps.length);updateCounts();return;}renderPMRStep();pmrElapsed=0;pmrPhase='tension';document.getElementById('pmrInstruction').textContent=pmrSteps[pmrStep].tension;document.getElementById('pmrPhaseLabel').textContent='🔴 Tensiona — 7 segundos';pmrSteps[pmrStep].zones.forEach(z=>{const el=document.getElementById(z);if(el)el.className='muscle-group tension';});document.getElementById('pmrPhaseFill').style.width='0%';}}},1000);}
+function resetPMR(){clearInterval(pmrInterval);initPMR();}
+
+// SCAN
+const scanZones=[{name:'Cabeza y cuero cabelludo',zone:'scan-head',dur:25,inst:'Lleva tu atención a tu cabeza. ¿Hay tensión? Solo observa.'},{name:'Rostro',zone:'scan-head',dur:25,inst:'Observa tu frente, mejillas, mandíbula. Permite que se abra ligeramente.'},{name:'Cuello y garganta',zone:'scan-neck',dur:25,inst:'Nota cualquier tensión en el cuello. Con cada exhalación, se disuelve.'},{name:'Hombros',zone:'scan-shoulders',dur:25,inst:'¿Están levantados hacia las orejas? Permite que caigan.'},{name:'Brazos y manos',zone:'scan-larm',dur:30,inst:'Recorre tus brazos hasta las puntas de los dedos.'},{name:'Pecho',zone:'scan-chest',dur:30,inst:'Observa cómo el pecho sube y baja. ¿Hay opresión?'},{name:'Abdomen',zone:'scan-abdomen',dur:30,inst:'El abdomen es el centro de la respiración. Permite que esté suave.'},{name:'Espalda baja',zone:'scan-hips',dur:25,inst:'La espalda baja retiene tensión. Con cada exhalación, se hunde más.'},{name:'Cadera y pelvis',zone:'scan-hips',dur:25,inst:'Observa la región de la cadera. Permite que descanse.'},{name:'Muslos',zone:'scan-lthigh',dur:25,inst:'¿Están los músculos tensos o sueltos? Permíteles relajarse.'},{name:'Rodillas y pantorrillas',zone:'scan-lcalf',dur:25,inst:'Observa las rodillas y pantorrillas sin juzgar.'},{name:'Tobillos y pies',zone:'scan-feet',dur:25,inst:'Nota el contacto con la superficie. Pies, planta, talón.'},{name:'Cuerpo completo',zone:null,dur:30,inst:'Observa todo tu cuerpo como un todo.'}];
+let scanRunning=false,scanStep=0,scanElapsed=0,scanInterval=null;
+function initScan(){scanRunning=false;scanStep=0;scanElapsed=0;clearInterval(scanInterval);document.getElementById('scanBtn').textContent='▶ Iniciar';document.getElementById('scanFill').style.width='0%';document.querySelectorAll('.scan-zone').forEach(el=>el.className='scan-zone');renderScanStep();}
+function renderScanStep(){if(scanStep>=scanZones.length)return;const z=scanZones[scanStep];document.getElementById('scanStepNum').textContent=`Zona ${scanStep+1} de ${scanZones.length}`;document.getElementById('scanZoneName').textContent=z.name;document.getElementById('scanInstruction').textContent=z.inst;document.querySelectorAll('.scan-zone').forEach(el=>el.classList.remove('scanning'));if(z.zone){const el=document.getElementById(z.zone);if(el)el.classList.add('scanning');}}
+function toggleScan(){if(scanStep>=scanZones.length){resetScan();return;}if(scanRunning){scanRunning=false;clearInterval(scanInterval);document.getElementById('scanBtn').textContent='▶ Continuar';return;}scanRunning=true;document.getElementById('scanBtn').textContent='⏸ Pausar';scanInterval=setInterval(()=>{if(!scanRunning)return;scanElapsed++;const cur=scanZones[scanStep];const pct=Math.min(scanElapsed/cur.dur,1);document.getElementById('scanFill').style.width=pct*100+'%';if(scanElapsed>=cur.dur){const prev=scanZones[scanStep];if(prev.zone){const el=document.getElementById(prev.zone);if(el){el.classList.remove('scanning');el.classList.add('scanned');}}scanStep++;scanElapsed=0;if(scanStep>=scanZones.length){clearInterval(scanInterval);scanRunning=false;document.getElementById('scanZoneName').textContent='Escaneo completado 🌿';document.getElementById('scanInstruction').textContent='Has recorrido todo tu cuerpo con atención plena.';document.getElementById('scanBtn').textContent='✓ Completado';document.getElementById('scanFill').style.width='100%';saveRXSession('Escaneo corporal',scanZones.reduce((a,z)=>a+z.dur,0),1);updateCounts();return;}renderScanStep();}},1000);}
+function resetScan(){clearInterval(scanInterval);initScan();}
+
+// GROUNDING
+const groundingConfig=[5,4,3,2,1];
+const groundingPlaceholders={5:['Una silla','Una ventana','Mis manos','Una planta','Un vaso'],4:['La textura de mi ropa','El asiento bajo mí','Una superficie fría','Mi cabello'],3:['El zumbido del ventilador','Voces a lo lejos','Mi respiración'],2:['Café','El aire fresco'],1:['El sabor de mi boca']};
+let groundingCurrent=0;
+function initGrounding(){groundingCurrent=0;document.getElementById('grounding-complete').style.display='none';document.getElementById('grounding-nav').style.display='flex';document.getElementById('groundingBtn').textContent='Siguiente sentido →';groundingConfig.forEach(n=>{const gs=document.getElementById('gs-'+n);gs.className='grounding-sense'+(n===5?' active-sense':'');const si=document.getElementById('si-'+n);si.innerHTML=Array.from({length:n},(_,i)=>`<div class="sense-item"><div class="sense-check" id="sc-${n}-${i}" onclick="checkSenseItem(${n},${i})"></div><input type="text" placeholder="${groundingPlaceholders[n][i]||'Escribe aquí…'}" id="si-${n}-${i}"></div>`).join('');});}
+function checkSenseItem(n,i){const el=document.getElementById(`sc-${n}-${i}`);el.classList.toggle('checked');el.textContent=el.classList.contains('checked')?'✓':'';}
+function advanceGrounding(){const current=groundingConfig[groundingCurrent];document.getElementById('gs-'+current).classList.remove('active-sense');document.getElementById('gs-'+current).classList.add('done-sense');groundingCurrent++;if(groundingCurrent>=groundingConfig.length){document.getElementById('grounding-complete').style.display='block';document.getElementById('grounding-nav').style.display='none';saveRXSession('Grounding 5-4-3-2-1',120,1);updateCounts();return;}const next=groundingConfig[groundingCurrent];document.getElementById('gs-'+next).classList.add('active-sense');document.getElementById('gs-'+next).scrollIntoView({behavior:'smooth',block:'start'});if(groundingCurrent===groundingConfig.length-1)document.getElementById('groundingBtn').textContent='✓ Completar';}
+
+// ══ EXPORT PDF ══
+function exportCurrentPDF(){
+  const content=document.getElementById('summary-content')?.innerHTML||'';
+  const label=document.getElementById('summary-label')?.textContent||'POKEDEX';
+  const w=window.open('','_blank','width=820,height=700');
+  if(!w){alert('Permite ventanas emergentes para exportar PDF.');return;}
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${label}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;color:#2c2c2c;padding:2rem;max-width:720px;margin:0 auto;font-size:13.5px;line-height:1.6;}h1,h2,h3{font-family:'DM Serif Display',serif;}.pdf-header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #8aab8e;padding-bottom:.75rem;margin-bottom:1.5rem;}.pdf-header h1{font-size:1.1rem;color:#4a7a4e;}.pdf-header span{font-size:11px;color:#9e9890;}.result-hero,.vh-summary-hero{background:#eef4ef;border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1.25rem;border:1px solid #c4d9c6;}.result-hero h2,.vh-summary-hero h2{font-size:1.4rem;margin-bottom:4px;}.summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}.summary-block{background:#f7f5f2;border-radius:8px;padding:.875rem;border:1px solid #e8e5e0;}.summary-block.full{grid-column:1/-1;}.summary-block-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#9e9890;margin-bottom:5px;}.summary-block-value{font-size:13px;line-height:1.6;white-space:pre-wrap;word-break:break-word;}.before-after{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem;}.before-card{background:#f0d5cc;border-radius:8px;padding:.875rem;border:1px solid #deb5a8;}.after-card{background:#eef4ef;border-radius:8px;padding:.875rem;border:1px solid #c4d9c6;}.ba-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}.before-card .ba-label{color:#c4826b;}.after-card .ba-label{color:#8aab8e;}.ba-value{font-size:13px;line-height:1.5;white-space:pre-wrap;}.emotion-pill{display:inline-block;padding:2px 8px;border-radius:20px;background:#f0d5cc;color:#8a3d2a;font-size:11px;margin:2px;}.distortion-pill{display:inline-block;padding:2px 8px;border-radius:20px;background:#e4dfef;color:#5b4e8a;font-size:11px;margin:2px;}.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;margin:2px;}.tag-gold{background:#fdf3c0;color:#7a6208;}.tag-lavender{background:#e4dfef;color:#5b4e8a;}.tag-sage{background:#c4d9c6;color:#4a7a4e;}.print-footer{margin-top:2rem;padding-top:1rem;border-top:1px solid #e8e5e0;font-size:11px;color:#9e9890;text-align:center;}input[type="range"]{display:none;}@media print{.no-print{display:none!important;}}</style></head><body>
+  <div class="pdf-header"><h1>${label}</h1><span>${new Date().toLocaleDateString('es-MX',{dateStyle:'long'})}</span></div>
+  ${content}
+  <div class="print-footer">Generado con POKEDEX TCC · ${new Date().toLocaleDateString('es-MX')}</div>
+  <div class="no-print" style="margin-top:1.5rem;text-align:center;">
+    <button onclick="window.print()" style="padding:10px 24px;background:#8aab8e;color:white;border:none;border-radius:8px;font-size:14px;cursor:pointer;margin-right:8px;">🖨️ Imprimir / Guardar PDF</button>
+    <button onclick="window.close()" style="padding:10px 18px;background:transparent;color:#9e9890;border:1.5px solid #e8e5e0;border-radius:8px;font-size:14px;cursor:pointer;">Cerrar</button>
+  </div></body></html>`);
+  w.document.close();
+}
+
+// ══ EXPORT EXCEL ══
+function exportExcel(){
+  if(typeof XLSX==='undefined'){alert('Biblioteca Excel cargando, intenta en un momento.');return;}
+  const wb=XLSX.utils.book_new();
+  const rpds=getRPD(),vhs=getVH(),rxs=getRX(),expos=getExpo(),ecs=getEC();
+  let total=0;
+  if(rpds.length){const rows=rpds.map(r=>({'Fecha':r.datetime?new Date(r.datetime).toLocaleString('es-MX'):'','Contexto':r.context||'','Situación':r.situation||'','Emociones antes':(r.emotions||[]).map(e=>`${e.name}(${e.before})`).join(', '),'Emociones después':(r.emotions||[]).map(e=>`${e.name}(${e.after})`).join(', '),'Pensamientos':r.thoughts||'','Creencia inicial %':r.belief||'','Distorsiones':(r.distortions||[]).join(', '),'Evidencia a favor':r.evidenceFor||'','Evidencia en contra':r.evidenceAgainst||'','Alternativa':r.alternative||'','Creencia alternativa %':r.altBelief||'','Reflexión':r.reflection||'','Acción':r.action||''}));const ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'RPD');total++;}
+  if(vhs.length){const rows=vhs.map(r=>({'Fecha':r.date?new Date(r.date).toLocaleString('es-MX'):'','Emoción':r.emotion||'','Evento':r.event||'','Interpretación':r.interpretations||'','Amenaza':r.threat||'','Catástrofe':r.catastrophe||'','Mente Sabia':r.wiseMind||'','Congruencia':r.congruence||''}));const ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Verificar Hechos');total++;}
+  if(expos.length){const rows=[];expos.forEach(r=>(r.items||[]).forEach(item=>rows.push({'Fecha':r.date?new Date(r.date).toLocaleString('es-MX'):'','Jerarquía':r.name||'','Miedo':r.fear||'','Situación':item.text||'','SUDS':item.suds||'','Tipo':item.type||'','Estado':item.status||'','Intentos':(item.attempts||[]).length})));if(rows.length){const ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Jerarquía Exposición');total++;}}
+  if(ecs.length){const fm={si:'Sí',parcial:'Parcialmente',no:'No'};const rows=ecs.map(r=>({'Fecha':r.date?new Date(r.date).toLocaleString('es-MX'):'','Creencia':r.belief||'','Contexto':r.context||'','Predicción':r.prediction||'','Conducta':r.behavior||'','Observación':r.observation||'','Predicción cumplida':fm[r.fulfilled]||'','Creencia antes %':r.beliefPre||'','Creencia después %':r.beliefPost||'','Cambio %':(r.beliefPre&&r.beliefPost?r.beliefPre-r.beliefPost:''),'Aprendizaje':r.learning||'','Reformulación':r.reformulation||''}));const ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Experimentos Conductuales');total++;}
+  if(rxs.length){const rows=rxs.map(r=>({'Fecha':r.date?new Date(r.date).toLocaleString('es-MX'):'','Técnica':r.technique||'','Duración (min)':r.duration||0}));const ws=XLSX.utils.json_to_sheet(rows);XLSX.utils.book_append_sheet(wb,ws,'Desactivación');total++;}
+  if(!total){alert('No hay registros guardados para exportar.');return;}
+  XLSX.writeFile(wb,`POKEDEX_TCC_${new Date().toISOString().split('T')[0]}.xlsx`);
+}
+
+// ══ INIT ══
+(async()=>{
+  await loadSBCreds();
+  await loadAllCache();
+  updateCounts();
+})();
+</script>
