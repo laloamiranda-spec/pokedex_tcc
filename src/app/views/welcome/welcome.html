@@ -1,0 +1,77 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · Herramientas TCC</span>
+  <div class="hero-row">
+    <div>
+      <h1>Entrena tu mente,<br><em>transforma</em> tus pensamientos.</h1>
+      <p>Herramientas TCC y DBT para identificar pensamientos, verificar emociones, enfrentar miedos y calmar tu sistema nervioso.</p>
+      <div class="hero-meta">
+        <span class="tag tag-sage">🧠 Beck &amp; Burns</span>
+        <span class="tag tag-lavender">✨ DBT</span>
+        <span class="tag tag-gold">🪜 Exposición</span>
+        <span class="tag tag-teal">🫁 Desactivación</span>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-item"><div class="stat-num rpd">{{ countRpd() }}</div><div class="stat-label">RPD</div></div>
+      <div class="stat-item"><div class="stat-num vh">{{ countVh() }}</div><div class="stat-label">VH</div></div>
+      <div class="stat-item"><div class="stat-num exp">{{ countExpo() }}</div><div class="stat-label">🪜</div></div>
+      <div class="stat-item"><div class="stat-num rx">{{ countRx() }}</div><div class="stat-label">🫁</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="home-cards">
+    <div class="tool-card rpd" routerLink="/rpd">
+      <span class="tool-card-icon">🧠</span>
+      <h3>Registro de Pensamientos</h3>
+      <p>6 columnas para reformular pensamientos negativos.</p>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="tag tag-sage">Beck</span><span class="tag tag-sage">Burns</span>
+      </div>
+      <button class="tool-card-btn">＋ Iniciar →</button>
+    </div>
+    <div class="tool-card verify" routerLink="/verify">
+      <span class="tool-card-icon">🔎</span>
+      <h3>Verificar los Hechos</h3>
+      <p>Examina si tu emoción concuerda con los hechos objetivos.</p>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="tag tag-lavender">DBT</span>
+      </div>
+      <button class="tool-card-btn">Iniciar →</button>
+    </div>
+    <div class="tool-card relax" routerLink="/relax">
+      <span class="tool-card-icon">🫁</span>
+      <h3>Desactivación Fisiológica</h3>
+      <p>Respiración, relajación muscular, grounding y más.</p>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="tag tag-teal">PMR</span><span class="tag tag-teal">5-4-3-2-1</span>
+      </div>
+      <button class="tool-card-btn">Explorar →</button>
+    </div>
+  </div>
+  <div class="home-cards-2">
+    <div class="tool-card expo" routerLink="/expo">
+      <span class="tool-card-icon">🪜</span>
+      <h3>Jerarquía de Exposición</h3>
+      <p>Construye una escalera SUDS y registra intentos graduales.</p>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="tag tag-gold">SUDS</span><span class="tag tag-gold">Exposición gradual</span>
+      </div>
+      <button class="tool-card-btn">Construir →</button>
+    </div>
+    <div class="tool-card exp" routerLink="/ec">
+      <span class="tool-card-icon">🔬</span>
+      <h3>Experimento Conductual</h3>
+      <p>Pon a prueba una creencia negativa con evidencia real.</p>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px;">
+        <span class="tag tag-clay">TCC</span><span class="tag tag-clay">Beck</span>
+      </div>
+      <button class="tool-card-btn">Iniciar →</button>
+    </div>
+  </div>
+  <div class="callout teal">
+    <span class="callout-icon">💡</span>
+    <span>Cuando notes activación fisiológica intensa, prueba primero las técnicas de desactivación antes del RPD o exposición.</span>
+  </div>
+</div>

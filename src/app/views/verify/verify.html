@@ -1,0 +1,163 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · DBT</span>
+  <h1>Verificar los <em>hechos</em></h1>
+  <p>Examina si tus emociones concuerdan con la situación objetiva.</p>
+</div>
+
+<div class="main">
+  <div class="callout">
+    <span class="callout-icon">💡</span>
+    <span>Las emociones no son hechos. Esta herramienta examina si tu emoción concuerda con la realidad objetiva.</span>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="vh-progress-summary">
+    @for (n of [1,2,3,4,5,6]; track n) {
+      <div class="vh-prog-dot" [class.done]="isDone(n)"></div>
+    }
+  </div>
+
+  <!-- Step 1 -->
+  <div class="vh-step" [class.open]="isOpen(1)" [class.completed]="isDone(1)">
+    <div class="vh-step-header" (click)="toggle(1)">
+      <div class="vh-step-num">{{ isDone(1) ? '✓' : '1' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Cuál es la emoción que quiero cambiar?</div>
+        <div class="vh-step-subtitle">Nombra la emoción con precisión</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>💡</span><span>Nombrar con precisión es el primer paso para regular.</span></div>
+      <div class="vh-emotion-selector">
+        @for (emo of emotions; track emo) {
+          <button class="vh-emo-chip" [class.sel]="isEmoSel(emo)" (click)="toggleEmo(emo)">{{ emo }}</button>
+        }
+      </div>
+      <div class="vh-actions"><button class="btn-nav btn-next" (click)="markDone(1)">Siguiente →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="vh-step" [class.open]="isOpen(2)" [class.completed]="isDone(2)">
+    <div class="vh-step-header" (click)="toggle(2)">
+      <div class="vh-step-num">{{ isDone(2) ? '✓' : '2' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Cuál fue el evento?</div>
+        <div class="vh-step-subtitle">Solo lo observable con tus sentidos</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>🎥</span><span>¿Qué capturaría una cámara? Solo lo observable.</span></div>
+      <label class="vh-label">Describe el evento con hechos observables</label>
+      <textarea class="vh-textarea" [(ngModel)]="event" rows="4" placeholder="Mi compañero no me saludó cuando entré…"></textarea>
+      <div class="vh-actions"><button class="btn-nav btn-next" (click)="markDone(2)">Siguiente →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="vh-step" [class.open]="isOpen(3)" [class.completed]="isDone(3)">
+    <div class="vh-step-header" (click)="toggle(3)">
+      <div class="vh-step-num">{{ isDone(3) ? '✓' : '3' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Cuáles son mis interpretaciones?</div>
+        <div class="vh-step-subtitle">Genera interpretaciones alternativas</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>🌐</span><span>Una interpretación no es un hecho hasta ser verificada.</span></div>
+      <label class="vh-label">Mi interpretación inicial</label>
+      <textarea class="vh-textarea" [(ngModel)]="interpretations" rows="3" placeholder="Mi compañero está enojado conmigo…"></textarea>
+      <label class="vh-label" style="margin-top:10px;">Otras interpretaciones posibles</label>
+      <textarea class="vh-textarea" rows="3" placeholder="— Puede que tenga un problema personal.&#10;— Puede que no me haya visto entrar."></textarea>
+      <div class="vh-actions"><button class="btn-nav btn-next" (click)="markDone(3)">Siguiente →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="vh-step" [class.open]="isOpen(4)" [class.completed]="isDone(4)">
+    <div class="vh-step-header" (click)="toggle(4)">
+      <div class="vh-step-num">{{ isDone(4) ? '✓' : '4' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Estoy asumiendo una amenaza?</div>
+        <div class="vh-step-subtitle">Etiqueta y evalúa su probabilidad</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>📊</span><span>Las emociones intensas tienden a sobreestimar amenazas.</span></div>
+      <label class="vh-label">¿Cuál es la amenaza específica?</label>
+      <textarea class="vh-textarea" [(ngModel)]="threat" rows="3" placeholder="Temo que mi compañero me haga el vacío…"></textarea>
+      <label class="vh-label" style="margin-top:10px;">Posibles resultados (incluye neutrales y positivos)</label>
+      <textarea class="vh-textarea" rows="4" placeholder="— Lo más probable: es solo un día difícil para él."></textarea>
+      <div class="vh-actions"><button class="btn-nav btn-next" (click)="markDone(4)">Siguiente →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 5 -->
+  <div class="vh-step" [class.open]="isOpen(5)" [class.completed]="isDone(5)">
+    <div class="vh-step-header" (click)="toggle(5)">
+      <div class="vh-step-num">{{ isDone(5) ? '✓' : '5' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Qué es lo catastrófico?</div>
+        <div class="vh-step-subtitle">Imagina la catástrofe y cómo afrontarla</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>🌊</span><span>La catastrofización pierde fuerza cuando le ponemos nombre concreto.</span></div>
+      <label class="vh-label">Describe el peor escenario posible</label>
+      <textarea class="vh-textarea" [(ngModel)]="catastrophe" rows="3" placeholder="La catástrofe sería que mi compañero hable mal de mí…"></textarea>
+      <label class="vh-label" style="margin-top:10px;">¿Cómo podrías afrontarlo?</label>
+      <textarea class="vh-textarea" rows="4" placeholder="Resolución de problemas: hablar directamente."></textarea>
+      <div class="vh-actions"><button class="btn-nav btn-next" (click)="markDone(5)">Siguiente →</button></div>
+    </div>
+  </div>
+
+  <!-- Step 6 -->
+  <div class="vh-step" [class.open]="isOpen(6)" [class.completed]="isDone(6)">
+    <div class="vh-step-header" (click)="toggle(6)">
+      <div class="vh-step-num">{{ isDone(6) ? '✓' : '6' }}</div>
+      <div class="vh-step-titles">
+        <div class="vh-step-question">¿Mi emoción concuerda con los hechos?</div>
+        <div class="vh-step-subtitle">Consulta a tu Mente Sabia</div>
+      </div>
+      <div class="vh-chevron">▾</div>
+    </div>
+    <div class="vh-step-body">
+      <div class="vh-tip"><span>🧘</span><span>Respira y pregúntate si esta emoción refleja la realidad.</span></div>
+      <label class="vh-label">¿Qué dice tu Mente Sabia?</label>
+      <textarea class="vh-textarea" [(ngModel)]="wiseMind" rows="4" placeholder="Aunque sentí ansiedad real, la situación no es tan amenazante…"></textarea>
+      <label class="vh-label" style="margin-top:12px;">¿Mi emoción concuerda con los hechos?</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
+        <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+          <input type="radio" name="vh-congru" value="si" [(ngModel)]="congruence" style="accent-color:var(--sage);width:18px;height:18px;"> Sí, son proporcionales
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+          <input type="radio" name="vh-congru" value="parcial" [(ngModel)]="congruence" style="width:18px;height:18px;"> Parcialmente desproporcionada
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:11px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+          <input type="radio" name="vh-congru" value="no" [(ngModel)]="congruence" style="width:18px;height:18px;"> No concuerdan
+        </label>
+      </div>
+      <div class="vh-actions" style="margin-top:16px;">
+        <button class="btn-nav btn-finish" (click)="complete()">✓ Completar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  @if (done()) {
+    <div class="vh-result-bar" style="display:block;animation:panelIn .3s ease">
+      <div style="font-size:2.5rem;margin-bottom:10px;">🌿</div>
+      <h3>¡Completado!</h3>
+      <p>Recuerda: las emociones son válidas, pero no siempre reflejan la realidad objetiva.</p>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:1.25rem;flex-wrap:wrap;">
+        <button class="btn-ghost" (click)="reset()">🔄 Repetir</button>
+        <a class="btn-nav btn-next" routerLink="/rpd">＋ Crear RPD</a>
+      </div>
+    </div>
+  }
+</div>

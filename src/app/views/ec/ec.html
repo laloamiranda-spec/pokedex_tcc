@@ -1,0 +1,160 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · TCC</span>
+  <h1>Experimento <em>Conductual</em></h1>
+  <p>Pon a prueba una creencia negativa con evidencia real del mundo.</p>
+</div>
+
+<div class="main">
+  <div class="callout lavender">
+    <span class="callout-icon">🔬</span>
+    <span>Un experimento conductual te permite comprobar empíricamente si tus predicciones se cumplen.</span>
+  </div>
+
+  <!-- Phase 1: Creencia -->
+  <div class="ec-phase" [class.active-phase]="isActive(1)" [class.done-phase]="isDone(1)">
+    <div class="ec-phase-header" (click)="togglePhase(1)">
+      <div class="ec-phase-num">{{ isDone(1) ? '✓' : '1' }}</div>
+      <div class="ec-phase-titles">
+        <div class="ec-phase-title">Identifica la creencia a poner a prueba</div>
+        <div class="ec-phase-sub">¿Qué creencia negativa quieres examinar?</div>
+      </div>
+      <div class="ec-chevron">▾</div>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tip"><span>🧪</span><span>Elige una creencia específica y medible.</span></div>
+      <div class="form-group">
+        <label class="form-label">Creencia negativa</label>
+        <textarea class="form-control" [(ngModel)]="belief" rows="3" placeholder="Ej: Si me equivoco en la presentación, todos pensarán que soy incompetente."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creencia antes del experimento (%)</label>
+        <div class="intensity-row">
+          <div class="slider-wrapper">
+            <div class="intensity-track"><div class="intensity-fill" [style.width]="beliefPre() + '%'"></div></div>
+            <input type="range" min="0" max="100" [value]="beliefPre()" (input)="beliefPre.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ beliefPre() }}%</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contexto del experimento</label>
+        <input type="text" class="form-control" [(ngModel)]="context" placeholder="¿Cuándo y dónde lo realizarás?">
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button class="btn-nav btn-lavender" (click)="markDone(1)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2: Predicción -->
+  <div class="ec-phase" [class.active-phase]="isActive(2)" [class.done-phase]="isDone(2)">
+    <div class="ec-phase-header" (click)="togglePhase(2)">
+      <div class="ec-phase-num">{{ isDone(2) ? '✓' : '2' }}</div>
+      <div class="ec-phase-titles">
+        <div class="ec-phase-title">Formula tu predicción</div>
+        <div class="ec-phase-sub">¿Qué esperas que ocurra?</div>
+      </div>
+      <div class="ec-chevron">▾</div>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tip"><span>🔮</span><span>Sé específico: ¿qué, cómo, cuánto?</span></div>
+      <div class="form-group">
+        <label class="form-label">Mi predicción</label>
+        <textarea class="form-control" [(ngModel)]="prediction" rows="3" placeholder="Predigo que si me equivoco, la audiencia perderá toda confianza en mí."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Comportamiento a realizar</label>
+        <textarea class="form-control" [(ngModel)]="behavior" rows="3" placeholder="Haré una presentación breve al equipo y me permitiré cometer algún error."></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button class="btn-nav btn-lavender" (click)="markDone(2)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3: Resultado -->
+  <div class="ec-phase" [class.active-phase]="isActive(3)" [class.done-phase]="isDone(3)">
+    <div class="ec-phase-header" (click)="togglePhase(3)">
+      <div class="ec-phase-num">{{ isDone(3) ? '✓' : '3' }}</div>
+      <div class="ec-phase-titles">
+        <div class="ec-phase-title">Registra lo que observaste</div>
+        <div class="ec-phase-sub">¿Qué ocurrió realmente?</div>
+      </div>
+      <div class="ec-chevron">▾</div>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tip"><span>📋</span><span>Solo hechos observables, sin interpretaciones.</span></div>
+      <div class="form-group">
+        <label class="form-label">Observaciones</label>
+        <textarea class="form-control" [(ngModel)]="observation" rows="4" placeholder="Me equivoqué en una cifra. La audiencia siguió atenta y alguno hizo preguntas al final."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">¿Se cumplió la predicción?</label>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+          <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:10px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+            <input type="radio" name="fulfilled" value="si" [(ngModel)]="fulfilled" style="accent-color:var(--clay);width:18px;height:18px;"> Sí se cumplió
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:10px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+            <input type="radio" name="fulfilled" value="parcial" [(ngModel)]="fulfilled" style="width:18px;height:18px;"> Parcialmente
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;font-size:13.5px;cursor:pointer;padding:10px 14px;border:1.5px solid var(--stone-light);border-radius:10px;">
+            <input type="radio" name="fulfilled" value="no" [(ngModel)]="fulfilled" style="accent-color:var(--sage);width:18px;height:18px;"> No se cumplió
+          </label>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:1rem;">
+        <button class="btn-nav btn-lavender" (click)="markDone(3)">Siguiente →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 4: Aprendizaje -->
+  <div class="ec-phase" [class.active-phase]="isActive(4)" [class.done-phase]="isDone(4)">
+    <div class="ec-phase-header" (click)="togglePhase(4)">
+      <div class="ec-phase-num">{{ isDone(4) ? '✓' : '4' }}</div>
+      <div class="ec-phase-titles">
+        <div class="ec-phase-title">Aprendizaje y reformulación</div>
+        <div class="ec-phase-sub">¿Qué concluyes?</div>
+      </div>
+      <div class="ec-chevron">▾</div>
+    </div>
+    <div class="ec-body">
+      <div class="ec-tip"><span>🌱</span><span>Usa la evidencia real para actualizar tu creencia.</span></div>
+      <div class="form-group">
+        <label class="form-label">Aprendizaje</label>
+        <textarea class="form-control" [(ngModel)]="learning" rows="3" placeholder="Aprendí que equivocarse no destruye la credibilidad."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creencia reformulada</label>
+        <textarea class="form-control" [(ngModel)]="reformulation" rows="3" placeholder="Puedo cometer errores y aun así ser percibido como competente."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creencia después del experimento (%)</label>
+        <div class="intensity-row">
+          <div class="slider-wrapper">
+            <div class="intensity-track"><div class="intensity-fill" [style.width]="beliefPost() + '%'"></div></div>
+            <input type="range" min="0" max="100" [value]="beliefPost()" (input)="beliefPost.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ beliefPost() }}%</span>
+        </div>
+      </div>
+      <!-- Before/After comparison -->
+      <div class="belief-comparison">
+        <div class="belief-box bb-pre">
+          <div class="belief-box-label">Antes</div>
+          <div class="belief-box-val">{{ beliefPre() }}%</div>
+        </div>
+        <div class="arrow-connector">→</div>
+        <div class="belief-box bb-post">
+          <div class="belief-box-label">Después</div>
+          <div class="belief-box-val">{{ beliefPost() }}%</div>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-top:1.25rem;">
+        <button class="btn-nav btn-finish" (click)="save()">{{ saved() ? '✅ Guardado' : '✓ Guardar' }}</button>
+      </div>
+    </div>
+  </div>
+
+</div>

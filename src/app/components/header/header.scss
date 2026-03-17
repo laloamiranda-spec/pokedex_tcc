@@ -1,0 +1,48 @@
+header {
+  background: rgba(253,252,250,0.95);
+  border-bottom: 1px solid var(--stone-light);
+  padding: 0 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.header-inner {
+  max-width: 1100px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: var(--header-h); gap: .75rem;
+}
+.logo { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.logo-badge {
+  width: 32px; height: 32px; background: var(--sage); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); color: white; font-size: 10px;
+  letter-spacing: -.5px; line-height: 1.1; text-align: center;
+}
+.logo-text { font-size: 14px; font-weight: 600; color: var(--ink); letter-spacing: -.3px; }
+.logo-sub { color: var(--stone); font-weight: 300; font-size: 10px; display: block; }
+.nav-tabs {
+  display: flex; gap: 2px; background: var(--mist);
+  border: 1px solid var(--stone-light); border-radius: 10px;
+  padding: 3px; overflow-x: auto;
+}
+.nav-tab {
+  padding: 6px 10px; border: none; background: transparent; border-radius: 8px;
+  font-family: var(--font-body); font-size: 11.5px; font-weight: 500;
+  color: var(--stone); cursor: pointer; transition: all .2s; white-space: nowrap;
+  text-decoration: none; display: inline-flex; align-items: center;
+}
+.nav-tab:hover { color: var(--ink); }
+.nav-tab.active { background: var(--warm-white); color: var(--ink); box-shadow: var(--shadow); }
+.header-right { display: flex; gap: 8px; flex-shrink: 0; align-items: center; }
+.sb-btn {
+  padding: 6px 10px; border: 1.5px solid var(--stone-light); background: transparent;
+  border-radius: 8px; font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  color: var(--stone); cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all .2s;
+}
+.sb-btn:hover { border-color: var(--lavender); color: var(--lavender); }
+.settings-modal .subtitle { font-size: 12.5px; color: var(--stone); font-weight: 300; margin-bottom: 1.25rem; line-height: 1.6; }
+
+@media (max-width: 768px) {
+  .nav-tabs, .header-right { display: none; }
+}

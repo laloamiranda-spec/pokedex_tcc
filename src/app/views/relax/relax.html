@@ -1,0 +1,193 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · Desactivación Fisiológica</span>
+  <h1>Técnicas de <em class="teal">Calma</em></h1>
+  <p>Activa tu sistema nervioso parasimpático con respiración, grounding y más.</p>
+</div>
+
+<div class="main">
+
+  <!-- ── Menú ── -->
+  @if (panel() === 'menu') {
+    <div class="rx-grid">
+      <div class="rx-card" (click)="showPanel('breath')">
+        <span class="rx-card-icon">🫁</span>
+        <div class="rx-card-title">Respiración guiada</div>
+        <div class="rx-card-desc">4-7-8, coherente, box breathing</div>
+      </div>
+      <div class="rx-card" (click)="showPanel('pmr')">
+        <span class="rx-card-icon">💪</span>
+        <div class="rx-card-title">Relajación Muscular</div>
+        <div class="rx-card-desc">PMR — tensión y liberación progresiva</div>
+      </div>
+      <div class="rx-card" (click)="showPanel('grounding')">
+        <span class="rx-card-icon">🌱</span>
+        <div class="rx-card-title">5-4-3-2-1 Grounding</div>
+        <div class="rx-card-desc">Ancla al presente con tus cinco sentidos</div>
+      </div>
+    </div>
+    <div class="callout teal">
+      <span class="callout-icon">💡</span>
+      <span>Usa estas técnicas antes de iniciar un RPD o exposición si notas activación intensa.</span>
+    </div>
+  }
+
+  <!-- ── Respiración ── -->
+  @if (panel() === 'breath') {
+    <button class="btn-back" (click)="showPanel('menu')">← Volver</button>
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-teal">🫁</div>
+        <div><div class="card-title">Respiración guiada</div><div class="card-desc">Sigue el ritmo del círculo.</div></div>
+      </div>
+      <div class="breath-pattern-selector">
+        @for (p of patterns; track p.name; let i = $index) {
+          <button class="bp-btn" [class.sel]="selectedPattern() === i" (click)="selectPattern(i)">{{ p.name }}</button>
+        }
+      </div>
+      <div class="breath-container">
+        <div class="breath-circle-wrap">
+          <div class="breath-ring"></div>
+          <div class="breath-circle" [style.transform]="'scale(' + circleScale() + ')'">
+            <div class="breath-text">
+              {{ phase() }}
+              <span class="breath-phase">{{ phaseSub() }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="breath-controls">
+          <div class="breath-stats">
+            <div class="breath-stat"><div class="breath-stat-num">{{ cycles() }}</div><div class="breath-stat-label">ciclos</div></div>
+            <div class="breath-stat"><div class="breath-stat-num">{{ elapsed() }}s</div><div class="breath-stat-label">tiempo</div></div>
+          </div>
+          <button class="breath-start-btn" [class.stop]="isRunning()" (click)="toggleBreath()">
+            {{ isRunning() ? 'Detener' : 'Iniciar' }}
+          </button>
+          <p class="breath-instructions">Inhala por la nariz, exhala lentamente por la boca.</p>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ── PMR ── -->
+  @if (panel() === 'pmr') {
+    <button class="btn-back" (click)="showPanel('menu')">← Volver</button>
+    <div class="callout">
+      <span class="callout-icon">💪</span>
+      <span>Tensa cada grupo muscular 7 segundos, luego suéltalo 20 segundos. Nota la diferencia.</span>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon icon-clay">💪</div>
+        <div>
+          <div class="card-title">Relajación Muscular Progresiva</div>
+          <div class="card-desc">Paso {{ pmrStep() + 1 }} de {{ pmrSteps.length }}</div>
+        </div>
+      </div>
+
+      <div class="pmr-body">
+        <!-- Figura del cuerpo con zonas iluminadas -->
+        <div class="pmr-figure">
+          <svg viewBox="0 0 80 200" xmlns="http://www.w3.org/2000/svg">
+            <ellipse id="pmr-head"     [class]="'muscle-group ' + partClass('pmr-head')"     cx="40" cy="18" rx="14" ry="16"/>
+            <rect   id="pmr-neck"     [class]="'muscle-group ' + partClass('pmr-neck')"     x="33"  y="32"  width="14" height="10" rx="4"/>
+            <ellipse id="pmr-shoulders"[class]="'muscle-group ' + partClass('pmr-shoulders')"cx="40" cy="50" rx="26" ry="10"/>
+            <rect   id="pmr-chest"    [class]="'muscle-group ' + partClass('pmr-chest')"    x="24"  y="52"  width="32" height="20" rx="6"/>
+            <rect   id="pmr-larm"     [class]="'muscle-group ' + partClass('pmr-larm')"     x="8"   y="50"  width="14" height="35" rx="6"/>
+            <rect   id="pmr-rarm"     [class]="'muscle-group ' + partClass('pmr-rarm')"     x="58"  y="50"  width="14" height="35" rx="6"/>
+            <rect   id="pmr-abdomen"  [class]="'muscle-group ' + partClass('pmr-abdomen')"  x="24"  y="74"  width="32" height="22" rx="6"/>
+            <ellipse id="pmr-lhand"   [class]="'muscle-group ' + partClass('pmr-lhand')"    cx="15" cy="93" rx="7"  ry="9"/>
+            <ellipse id="pmr-rhand"   [class]="'muscle-group ' + partClass('pmr-rhand')"    cx="65" cy="93" rx="7"  ry="9"/>
+            <rect   id="pmr-hips"     [class]="'muscle-group ' + partClass('pmr-hips')"     x="22"  y="98"  width="36" height="16" rx="6"/>
+            <rect   id="pmr-lthigh"   [class]="'muscle-group ' + partClass('pmr-lthigh')"   x="22"  y="116" width="16" height="32" rx="6"/>
+            <rect   id="pmr-rthigh"   [class]="'muscle-group ' + partClass('pmr-rthigh')"   x="42"  y="116" width="16" height="32" rx="6"/>
+            <rect   id="pmr-lcalf"    [class]="'muscle-group ' + partClass('pmr-lcalf')"    x="22"  y="150" width="16" height="28" rx="6"/>
+            <rect   id="pmr-rcalf"    [class]="'muscle-group ' + partClass('pmr-rcalf')"    x="42"  y="150" width="16" height="28" rx="6"/>
+            <ellipse id="pmr-feet"    [class]="'muscle-group ' + partClass('pmr-feet')"     cx="40" cy="185" rx="22" ry="8"/>
+          </svg>
+        </div>
+
+        <!-- Panel derecho -->
+        <div class="pmr-content">
+          <div class="pmr-step-indicator">Paso {{ pmrStep() + 1 }} de {{ pmrSteps.length }}</div>
+          <div class="pmr-step-title">{{ pmrSteps[pmrStep()].name }}</div>
+          <div class="pmr-instruction">{{ pmrSteps[pmrStep()].instruction }}</div>
+
+          <div class="pmr-phase-label">{{ pmrPhaseLabel() }}</div>
+          <div class="pmr-phase-bar">
+            <div class="pmr-phase-fill"
+              [style.width]="pmrPhasePct() + '%'"
+              [style.background]="pmrPhase() === 'tension' ? 'var(--clay)' : pmrPhase() === 'release' ? 'var(--sage)' : 'var(--teal)'">
+            </div>
+          </div>
+
+          @if (!pmrDone()) {
+            <div class="pmr-controls">
+              <button class="btn-nav" [class.btn-teal]="!pmrRunning()" [class.btn-finish]="pmrRunning()" (click)="togglePmr()">
+                {{ pmrRunning() ? '⏸ Pausar' : (pmrStep() === 0 && pmrPhasePct() === 0 ? '▶ Iniciar' : '▶ Continuar') }}
+              </button>
+              <button class="btn-nav btn-prev" (click)="resetPmr()">↺</button>
+            </div>
+          } @else {
+            <div style="text-align:center;padding:1rem 0;">
+              <div style="font-size:2rem;margin-bottom:6px;">🎉</div>
+              <div style="font-family:var(--font-display);font-size:1.1rem;color:var(--ink);margin-bottom:4px;">¡Completado!</div>
+              <button class="btn-ghost" style="margin-top:.5rem;" (click)="resetPmr()">↺ Repetir</button>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Lista de grupos (scroll) -->
+      <div class="pmr-steps-list" style="margin-top:1rem;">
+        @for (s of pmrSteps; track s.name; let i = $index) {
+          <div class="pmr-step-item"
+            [class.current]="i === pmrStep() && !pmrDone()"
+            [class.done]="i < pmrStep() || pmrDone()">
+            <div class="pmr-step-dot"></div>
+            {{ s.name }}
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- ── Grounding ── -->
+  @if (panel() === 'grounding') {
+    <button class="btn-back" (click)="showPanel('menu')">← Volver</button>
+    <div class="callout teal">
+      <span class="callout-icon">🌱</span>
+      <span>Ancla tu mente al presente nombrando cosas reales que percibes ahora mismo.</span>
+    </div>
+    <div class="grounding-container">
+      @for (sense of senses; track sense.num; let si = $index) {
+        <div class="grounding-sense"
+          [class.active-sense]="senseActive(si)"
+          [class.done-sense]="senseComplete(si)">
+          <div class="sense-header">
+            <div class="sense-num">{{ sense.num }}</div>
+            <div class="sense-icon">{{ sense.icon }}</div>
+            <div>
+              <div class="sense-title">{{ sense.title }}</div>
+              <div class="sense-subtitle">{{ sense.subtitle }}</div>
+            </div>
+          </div>
+          <div class="sense-items">
+            @for (item of makeArray(sense.count); track $index; let ii = $index) {
+              <div class="sense-item">
+                <input type="text" [placeholder]="'#' + (ii + 1)"
+                  [value]="groundingItems()[si][ii]"
+                  (input)="setGroundingItem(si, ii, $any($event.target).value)">
+                <div class="sense-check" [class.checked]="groundingChecked()[si][ii]"
+                  (click)="toggleGroundingCheck(si, ii)">
+                  {{ groundingChecked()[si][ii] ? '✓' : '' }}
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>

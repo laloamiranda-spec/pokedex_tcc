@@ -1,0 +1,31 @@
+// ── PMR Figure ──
+.pmr-figure {
+  width: 100px;
+  flex-shrink: 0;
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
+}
+
+.muscle-group {
+  fill: #d0d5dd;
+  transition: fill 0.4s ease;
+  stroke: #fff;
+  stroke-width: 1;
+}
+
+.muscle-group.tension {
+  fill: var(--clay, #c0674e);
+  filter: drop-shadow(0 0 4px rgba(192, 103, 78, 0.7));
+}
+
+.muscle-group.release {
+  fill: var(--sage, #7aa68a);
+  filter: drop-shadow(0 0 4px rgba(122, 166, 138, 0.6));
+}
+
+.muscle-group.done {
+  fill: #a8d4b5;
+}

@@ -1,0 +1,243 @@
+<!-- Progress bar -->
+<div class="progress-track">
+  <div class="progress-steps">
+    <div class="progress-fill" [style.width]="progressWidth()"></div>
+    @for (i of [0,1,2,3,4,5,6]; track i) {
+      <div class="step-item" [class.active]="isStepActive(i)" [class.done]="isStepDone(i)" (click)="goTo(i)">
+        <div class="step-dot">{{ stepDotLabel(i) }}</div>
+      </div>
+    }
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- Saved confirmation -->
+  @if (saved()) {
+    <div class="result-hero" style="animation:viewIn .25s ease">
+      <div style="font-size:2.5rem;margin-bottom:10px;">✅</div>
+      <h2>¡Registro guardado!</h2>
+      <p>Redirigiendo a tus registros…</p>
+    </div>
+  }
+
+  <!-- Step 0: Situación -->
+  @if (currentStep() === 0 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-sage">🌪️</div>
+        <div><div class="card-title">Situación</div><div class="card-desc">Describe objetivamente qué ocurrió — hechos, no interpretaciones.</div></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Fecha y hora</label>
+          <input type="datetime-local" class="form-control" [(ngModel)]="datetime">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Contexto</label>
+          <input type="text" class="form-control" [(ngModel)]="context" placeholder="Trabajo, casa…">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Describe la situación</label>
+        <textarea class="form-control" [(ngModel)]="situation" rows="4" placeholder="¿Qué sucedió exactamente?"></textarea>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" routerLink="/welcome">← Inicio</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 1: Emociones -->
+  @if (currentStep() === 1 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-clay">💔</div>
+        <div><div class="card-title">Emociones</div><div class="card-desc">Selecciona y evalúa la intensidad (0–100).</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Selecciona tus emociones</label>
+        <div class="emotion-grid">
+          @for (emo of emotions; track emo) {
+            <button class="emotion-chip" [class.selected]="isEmoSelected(emo)" (click)="toggleEmotion(emo)">{{ emo }}</button>
+          }
+        </div>
+      </div>
+      @if (selectedEmotions().length > 0) {
+        <div class="emotion-intensity-block">
+          <div class="form-label" style="margin-bottom:10px;">Intensidad (0–100)</div>
+          @for (emo of selectedEmotions(); track emo) {
+            <div class="emotion-intensity-row">
+              <span class="emo-name">{{ emo }}</span>
+              <div class="emo-bar-wrap">
+                <div class="emo-bar-bg"></div>
+                <div class="emo-bar-fill" [style.width]="getIntensity(emo) + '%'"></div>
+                <input type="range" min="0" max="100" [value]="getIntensity(emo)"
+                  (input)="setIntensity(emo, +$any($event.target).value)">
+              </div>
+              <span class="emo-val">{{ getIntensity(emo) }}</span>
+            </div>
+          }
+        </div>
+      }
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 2: Pensamientos automáticos -->
+  @if (currentStep() === 2 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-lavender">💭</div>
+        <div><div class="card-title">Pensamientos automáticos</div><div class="card-desc">¿Qué cruzó por tu mente? Marca el más caliente con ☆.</div></div>
+      </div>
+      <div class="callout"><span class="callout-icon">💡</span>Escríbelos tal como aparecieron, sin filtrar.</div>
+      <div class="form-group">
+        <label class="form-label">Pensamientos automáticos</label>
+        <textarea class="form-control" [(ngModel)]="thoughts" rows="4" placeholder="☆ Mi trabajo no vale nada.&#10;No soy tan bueno como mis colegas."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creencia en el pensamiento caliente (0–100%)</label>
+        <div class="intensity-row">
+          <span class="intensity-label">Nada creíble</span>
+          <div class="slider-wrapper">
+            <div class="intensity-track">
+              <div class="intensity-fill" [style.width]="belief() + '%'"></div>
+            </div>
+            <input type="range" min="0" max="100" [value]="belief()" (input)="belief.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ belief() }}%</span>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 3: Distorsiones -->
+  @if (currentStep() === 3 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-lavender">🔍</div>
+        <div><div class="card-title">Distorsiones cognitivas</div><div class="card-desc">¿Qué errores de pensamiento identificas?</div></div>
+      </div>
+      <div class="distortion-grid">
+        @for (d of distortions; track d.key) {
+          <button class="distortion-card" [class.selected]="isDistSelected(d.key)" (click)="toggleDistortion(d.key)">
+            <div class="distortion-name">{{ d.name }}</div>
+            <div class="distortion-def">{{ d.def }}</div>
+          </button>
+        }
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 4: Evidencias -->
+  @if (currentStep() === 4 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-amber">⚖️</div>
+        <div><div class="card-title">Evidencias</div><div class="card-desc">Examina la evidencia como un científico.</div></div>
+      </div>
+      <div class="callout"><span class="callout-icon">⚖️</span>La evidencia son hechos observables, no interpretaciones.</div>
+      <div class="evidence-cols">
+        <div class="evidence-col">
+          <h4><span class="dot"></span> A FAVOR</h4>
+          <textarea class="form-control" [(ngModel)]="evidenceFor" rows="5" placeholder="¿Qué hechos objetivos apoyan este pensamiento?"></textarea>
+        </div>
+        <div class="evidence-col against">
+          <h4><span class="dot"></span> EN CONTRA</h4>
+          <textarea class="form-control" [(ngModel)]="evidenceAgainst" rows="5" placeholder="¿Qué hechos objetivos lo contradicen?"></textarea>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 5: Pensamiento alternativo -->
+  @if (currentStep() === 5 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-sage">🌱</div>
+        <div><div class="card-title">Pensamiento alternativo</div><div class="card-desc">Más realista y equilibrado — no necesariamente positivo.</div></div>
+      </div>
+      <div class="callout"><span class="callout-icon">🌱</span>¿Qué le dirías a un amigo con este pensamiento?</div>
+      <div class="form-group">
+        <label class="form-label">Pensamiento alternativo</label>
+        <textarea class="form-control" [(ngModel)]="alternative" rows="4" placeholder="Escribe una perspectiva más equilibrada…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Creencia (0–100%)</label>
+        <div class="intensity-row">
+          <span class="intensity-label">Nada creíble</span>
+          <div class="slider-wrapper">
+            <div class="intensity-track">
+              <div class="intensity-fill" [style.width]="altBelief() + '%'"></div>
+            </div>
+            <input type="range" min="0" max="100" [value]="altBelief()" (input)="altBelief.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ altBelief() }}%</span>
+        </div>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-next" (click)="next()">Continuar →</button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 6: Resultado -->
+  @if (currentStep() === 6 && !saved()) {
+    <div class="card" style="animation:panelIn .35s ease">
+      <div class="card-header">
+        <div class="card-icon icon-clay">🔄</div>
+        <div><div class="card-title">Resultado y reflexión</div><div class="card-desc">Re-evalúa tus emociones y reflexiona.</div></div>
+      </div>
+      @if (selectedEmotions().length > 0) {
+        <div class="form-group">
+          <label class="form-label">Re-evalúa la intensidad ahora</label>
+          <div class="emotion-intensity-block">
+            @for (emo of selectedEmotions(); track emo) {
+              <div class="emotion-intensity-row">
+                <span class="emo-name">{{ emo }}</span>
+                <div class="emo-bar-wrap">
+                  <div class="emo-bar-bg"></div>
+                  <div class="emo-bar-fill" [style.width]="getResultIntensity(emo) + '%'"></div>
+                  <input type="range" min="0" max="100" [value]="getResultIntensity(emo)"
+                    (input)="setResultIntensity(emo, +$any($event.target).value)">
+                </div>
+                <span class="emo-val">{{ getResultIntensity(emo) }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+      <div class="form-group">
+        <label class="form-label">Reflexión y aprendizajes</label>
+        <textarea class="form-control" [(ngModel)]="reflection" rows="3" placeholder="¿Qué aprendiste?"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Acción concreta (opcional)</label>
+        <textarea class="form-control" [(ngModel)]="action" rows="2" placeholder="¿Algo que puedas hacer diferente?"></textarea>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav btn-prev" (click)="prev()">← Anterior</button>
+        <button class="btn-nav btn-finish" (click)="save()">✓ Guardar</button>
+      </div>
+    </div>
+  }
+
+</div>

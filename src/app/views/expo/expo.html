@@ -1,0 +1,131 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · Exposición gradual</span>
+  <h1>Jerarquía de <em class="gold">Exposición</em></h1>
+  <p>Construye tu escalera SUDS. Afronta cada peldaño a tu ritmo y registra cada intento.</p>
+</div>
+
+<div class="main">
+  <!-- Context card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon icon-gold">🎯</div>
+      <div><div class="card-title">Miedo / situación objetivo</div><div class="card-desc">¿Qué quieres aprender a tolerar?</div></div>
+    </div>
+    <div class="callout gold"><span class="callout-icon">🪜</span><span>SUDS = Subjective Units of Distress Scale (0 = ninguna ansiedad, 100 = máxima).</span></div>
+    <div class="form-group">
+      <label class="form-label">Nombre de la jerarquía</label>
+      <input type="text" class="form-control" [(ngModel)]="expoName" placeholder="Ej: Hablar en público…">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Miedo central</label>
+      <textarea class="form-control" [(ngModel)]="fear" rows="2" placeholder="Ej: Si hablo en público, quedaré en ridículo."></textarea>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:.5rem;">
+    <div class="expo-section-title" style="margin:0;"><div class="badge">📍</div> Peldaños</div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-nav btn-gold" style="font-size:13px;padding:8px 16px;" (click)="toggleAdd()">＋ Agregar peldaño</button>
+      <button class="btn-nav btn-next" style="font-size:13px;padding:8px 16px;" (click)="saveExpo()">
+        {{ saved() ? '✅ Guardado' : '💾 Guardar' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Add form -->
+  @if (showAddForm()) {
+    <div class="add-item-form">
+      <div class="form-group">
+        <label class="form-label">Descripción de la situación</label>
+        <input type="text" class="form-control" [(ngModel)]="newItemText" placeholder="Ej: Llamar por teléfono a un desconocido…">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nivel SUDS anticipado</label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;">
+          @for (v of [10,20,30,40,50,60,70,80,90,100]; track v) {
+            <button class="suds-chip" [class.sel]="newItemSuds() === v" (click)="selectSuds(v)">{{ v }}</button>
+          }
+          <span style="font-size:13px;color:var(--gold);font-weight:600;margin-left:8px;align-self:center;">
+            {{ newItemSuds() ? 'SUDS: ' + newItemSuds() : 'SUDS: —' }}
+          </span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:.75rem;">
+        <button class="btn-ghost" (click)="toggleAdd()">Cancelar</button>
+        <button class="btn-nav btn-gold" (click)="addItem()">＋ Agregar</button>
+      </div>
+    </div>
+  }
+
+  <!-- Ladder -->
+  @if (items().length === 0) {
+    <div class="empty-state"><div class="empty-icon">🪜</div><p>Agrega peldaños a tu jerarquía.</p></div>
+  } @else {
+    <div class="ladder">
+      @for (item of items(); track item.id) {
+        <div class="ladder-item" [class]="itemClass(item)">
+          <div class="ladder-rung">
+            <div class="ladder-suds">
+              <div class="suds-num">{{ item.suds }}</div>
+              <div class="suds-label">SUDS</div>
+            </div>
+            <div class="ladder-divider"></div>
+            <div class="ladder-content">
+              <div class="ladder-situation">{{ item.text }}</div>
+              <div class="ladder-meta">
+                <span class="ladder-badge" [class]="statusBadge(item)">{{ statusLabel(item) }}</span>
+                @if (item.attempts.length > 0) {
+                  <span class="ladder-badge lb-attempts">{{ item.attempts.length }} intentos</span>
+                }
+              </div>
+            </div>
+            <div class="ladder-actions">
+              <button class="icon-btn gold" title="Registrar intento" (click)="openAttempt(item);$event.stopPropagation()">📝</button>
+              <button class="icon-btn danger" title="Eliminar" (click)="deleteItem(item.id);$event.stopPropagation()">🗑</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Attempt modal -->
+@if (attemptItem()) {
+  <div class="overlay open">
+    <div class="modal" style="max-width:480px;">
+      <button class="attempt-close" style="float:right;background:transparent;border:none;font-size:20px;color:var(--stone);cursor:pointer;" (click)="closeAttempt()">✕</button>
+      <h3>📝 Registrar intento</h3>
+      <p style="font-size:12.5px;color:var(--stone);font-weight:300;margin-bottom:1.25rem;">{{ attemptItem()?.text }}</p>
+      <div class="form-group">
+        <label class="form-label">SUDS antes</label>
+        <div class="intensity-row">
+          <div class="slider-wrapper">
+            <div class="intensity-track"><div class="intensity-fill" [style.width]="attemptSudsAntes() + '%'"></div></div>
+            <input type="range" min="0" max="100" [value]="attemptSudsAntes()" (input)="attemptSudsAntes.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ attemptSudsAntes() }}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">SUDS después</label>
+        <div class="intensity-row">
+          <div class="slider-wrapper">
+            <div class="intensity-track"><div class="intensity-fill" [style.width]="attemptSudsDespues() + '%'"></div></div>
+            <input type="range" min="0" max="100" [value]="attemptSudsDespues()" (input)="attemptSudsDespues.set(+$any($event.target).value)">
+          </div>
+          <span class="intensity-value">{{ attemptSudsDespues() }}</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notas (opcional)</label>
+        <textarea class="form-control" [(ngModel)]="attemptNotes" rows="3" placeholder="¿Qué ocurrió? ¿Qué aprendiste?"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;">
+        <button class="btn-ghost" (click)="closeAttempt()">Cancelar</button>
+        <button class="btn-nav btn-gold" (click)="addAttempt()">✓ Guardar intento</button>
+      </div>
+    </div>
+  </div>
+}

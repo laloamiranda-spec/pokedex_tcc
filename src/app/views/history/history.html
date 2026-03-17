@@ -1,0 +1,178 @@
+<div class="hero">
+  <span class="pokedex-label">POKEDEX · Registros</span>
+  <h1>Tus <em>registros</em></h1>
+  <p>Historial de todas tus sesiones TCC y DBT.</p>
+</div>
+
+<div class="main">
+
+  <!-- Detail view -->
+  @if (selectedRecord()) {
+    <div style="animation:viewIn .25s ease">
+      <button class="btn-back" (click)="back()">← Volver</button>
+
+      @if (isRpd(selectedRecord())) {
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-sage">🧠</div>
+            <div>
+              <div class="card-title">Registro de Pensamientos</div>
+              <div class="card-desc">{{ formatDate($any(selectedRecord()).datetime) }} · {{ $any(selectedRecord()).context }}</div>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-block"><div class="summary-block-label">Situación</div><div class="summary-block-value">{{ $any(selectedRecord()).situation }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Emociones</div><div class="summary-block-value">
+              @for (e of $any(selectedRecord()).emotions; track e.name) {
+                <span class="emotion-pill">{{ e.name }} ({{ e.value }})</span>
+              }
+            </div></div>
+            <div class="summary-block"><div class="summary-block-label">Pensamientos automáticos</div><div class="summary-block-value">{{ $any(selectedRecord()).thoughts }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Creencia inicial</div><div class="summary-block-value">{{ $any(selectedRecord()).belief }}%</div></div>
+            <div class="summary-block"><div class="summary-block-label">Distorsiones</div><div class="summary-block-value">
+              @for (d of $any(selectedRecord()).distortions; track d) {
+                <span class="distortion-pill">{{ d }}</span>
+              }
+            </div></div>
+            <div class="summary-block"><div class="summary-block-label">Evidencias a favor</div><div class="summary-block-value">{{ $any(selectedRecord()).evidenceFor }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Evidencias en contra</div><div class="summary-block-value">{{ $any(selectedRecord()).evidenceAgainst }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Pensamiento alternativo</div><div class="summary-block-value">{{ $any(selectedRecord()).alternative }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Reflexión</div><div class="summary-block-value">{{ $any(selectedRecord()).reflection }}</div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+            <button class="btn-ghost" style="border-color:var(--clay);color:var(--clay);" (click)="delete('rpd', $any(selectedRecord()).id)">🗑 Eliminar</button>
+          </div>
+        </div>
+      }
+
+      @if (isVh(selectedRecord())) {
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon icon-lavender">🔎</div>
+            <div>
+              <div class="card-title">Verificar los Hechos</div>
+              <div class="card-desc">{{ formatDate($any(selectedRecord()).date) }}</div>
+            </div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-block"><div class="summary-block-label">Emoción</div><div class="summary-block-value">{{ $any(selectedRecord()).emotion }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Evento</div><div class="summary-block-value">{{ $any(selectedRecord()).event }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Interpretaciones</div><div class="summary-block-value">{{ $any(selectedRecord()).interpretations }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Amenaza</div><div class="summary-block-value">{{ $any(selectedRecord()).threat }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Catástrofe</div><div class="summary-block-value">{{ $any(selectedRecord()).catastrophe }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Mente Sabia</div><div class="summary-block-value">{{ $any(selectedRecord()).wiseMind }}</div></div>
+            <div class="summary-block"><div class="summary-block-label">Congruencia</div><div class="summary-block-value">{{ $any(selectedRecord()).congruence }}</div></div>
+          </div>
+          <div style="margin-top:1rem;display:flex;justify-content:flex-end;">
+            <button class="btn-ghost" style="border-color:var(--clay);color:var(--clay);" (click)="delete('vh', $any(selectedRecord()).id)">🗑 Eliminar</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- List view -->
+  @if (!selectedRecord()) {
+    <!-- Tabs -->
+    <div class="history-tabs">
+      <button class="history-tab" [class.active]="activeTab()==='rpd'" (click)="setTab('rpd')">🧠 RPD ({{ storage.rpd().length }})</button>
+      <button class="history-tab" [class.active]="activeTab()==='vh'" (click)="setTab('vh')">🔎 VH ({{ storage.vh().length }})</button>
+      <button class="history-tab" [class.active]="activeTab()==='expo'" (click)="setTab('expo')">🪜 Expo ({{ storage.expo().length + storage.ec().length }})</button>
+      <button class="history-tab" [class.active]="activeTab()==='rx'" (click)="setTab('rx')">🫁 Calma ({{ storage.rx().length }})</button>
+    </div>
+
+    <!-- RPD list -->
+    @if (activeTab() === 'rpd') {
+      @if (currentRpd.length === 0) {
+        <div class="empty-state"><div class="empty-icon">🧠</div><p>Aún no tienes registros RPD.<br>Crea tu primero desde el menú.</p></div>
+      } @else {
+        <div class="history-list">
+          @for (r of currentRpd; track r.id) {
+            <div class="history-item" (click)="select(r)">
+              <div class="history-item-left">
+                <div class="history-date">{{ formatDate(r.datetime) }}</div>
+                <div class="history-situation">{{ r.situation }}</div>
+                <div class="history-emotions">
+                  @for (e of r.emotions.slice(0,3); track e.name) {
+                    <span class="emotion-pill">{{ e.name }}</span>
+                  }
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="history-type-badge badge-rpd">RPD</span>
+                <span class="history-arrow">›</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- VH list -->
+    @if (activeTab() === 'vh') {
+      @if (currentVh.length === 0) {
+        <div class="empty-state"><div class="empty-icon">🔎</div><p>Aún no tienes registros VH.</p></div>
+      } @else {
+        <div class="history-list">
+          @for (r of currentVh; track r.id) {
+            <div class="history-item vh-item" (click)="select(r)">
+              <div class="history-item-left">
+                <div class="history-date">{{ formatDate(r.date) }}</div>
+                <div class="history-situation">{{ r.event || r.emotion }}</div>
+                <div class="history-emotions"><span class="emotion-pill">{{ r.emotion }}</span></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="history-type-badge badge-vh">VH</span>
+                <span class="history-arrow">›</span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Expo list -->
+    @if (activeTab() === 'expo') {
+      @if (currentExpo.length === 0) {
+        <div class="empty-state"><div class="empty-icon">🪜</div><p>Aún no tienes jerarquías de exposición.</p></div>
+      } @else {
+        <div class="history-list">
+          @for (r of currentExpo; track $any(r).id) {
+            <div class="history-item expo-item">
+              <div class="history-item-left">
+                <div class="history-date">{{ formatDate($any(r).date) }}</div>
+                <div class="history-situation">{{ $any(r).name || $any(r).belief }}</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="history-type-badge badge-expo">{{ $any(r).type === 'ec' ? 'EC' : 'EXPO' }}</span>
+                <button class="icon-btn danger" (click)="delete($any(r).type, $any(r).id);$event.stopPropagation()">🗑</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+
+    <!-- Rx list -->
+    @if (activeTab() === 'rx') {
+      @if (currentRx.length === 0) {
+        <div class="empty-state"><div class="empty-icon">🫁</div><p>Aún no tienes sesiones de calma.</p></div>
+      } @else {
+        <div class="history-list">
+          @for (r of currentRx; track r.id) {
+            <div class="history-item rx-item">
+              <div class="history-item-left">
+                <div class="history-date">{{ formatDate(r.date) }}</div>
+                <div class="history-situation">{{ r.technique }} · {{ r.duration }}s</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span class="history-type-badge badge-rx">RX</span>
+                <button class="icon-btn danger" (click)="delete('rx', r.id);$event.stopPropagation()">🗑</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    }
+  }
+</div>
