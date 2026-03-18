@@ -719,6 +719,42 @@ details .details-body { padding: 1rem 1.125rem; }
   input, textarea, select { font-size: 16px !important; }
 }
 
+/* ── INFO PANEL (detalles de cada ejercicio) ─────────────────────── */
+.info-panel {
+  background: var(--surface-2);
+  border: 1px solid rgba(200,190,178,.4);
+  border-radius: var(--radius);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+.info-panel summary {
+  display: flex; align-items: center; gap: 9px;
+  padding: 13px 16px; cursor: pointer;
+  font-size: 13px; font-weight: 500; color: var(--stone);
+  list-style: none; user-select: none;
+  transition: color .2s;
+}
+.info-panel summary::-webkit-details-marker { display: none; }
+.info-panel summary::after {
+  content: '▾'; margin-left: auto; font-size: 11px;
+  transition: transform .25s cubic-bezier(.4,0,.2,1);
+}
+.info-panel[open] summary::after { transform: rotate(-180deg); }
+.info-panel[open] summary { color: var(--ink); }
+.info-panel summary:hover { color: var(--ink); }
+
+.info-panel-body {
+  padding: 0 16px 16px;
+  animation: panelIn .2s ease;
+}
+.info-panel-body p {
+  font-size: 13.5px; color: var(--ink-mid); line-height: 1.7;
+  font-weight: 300; margin-bottom: .75rem;
+}
+.info-panel-body p:last-child { margin-bottom: 0; }
+.info-panel-body strong { font-weight: 500; color: var(--ink); }
+.info-pill-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+
 /* ── AUTH VIEWS ──────────────────────────────────────────────────── */
 .auth-shell {
   min-height: 100vh;
