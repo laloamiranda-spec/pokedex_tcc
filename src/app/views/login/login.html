@@ -1,0 +1,52 @@
+<div class="auth-shell">
+  <div class="auth-card">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="auth-logo-badge">RPD<br>TCC</div>
+      <div>
+        <div class="auth-logo-name">POKEDEX</div>
+        <div class="auth-logo-sub">Terapia Cognitivo Conductual</div>
+      </div>
+    </div>
+
+    <h1 class="auth-title">Bienvenido de vuelta</h1>
+    <p class="auth-subtitle">Ingresa para continuar tu proceso.</p>
+
+    <!-- Error -->
+    @if (error()) {
+      <div class="auth-error">⚠️ {{ error() }}</div>
+    }
+
+    <!-- Form -->
+    <div class="form-group">
+      <label class="form-label">Correo electrónico</label>
+      <input type="email" class="form-control" [(ngModel)]="email"
+        placeholder="tu@correo.com" autocomplete="email" (keyup.enter)="submit()">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Contraseña</label>
+      <div class="auth-input-wrap">
+        <input [type]="showPass() ? 'text' : 'password'" class="form-control"
+          [(ngModel)]="password" placeholder="••••••••"
+          autocomplete="current-password" (keyup.enter)="submit()">
+        <button class="auth-eye" type="button" (click)="showPass.update(v => !v)">
+          {{ showPass() ? '🙈' : '👁' }}
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-top:-6px;margin-bottom:1.25rem;">
+      <a routerLink="/forgot-password" class="auth-link">¿Olvidaste tu contraseña?</a>
+    </div>
+
+    <button class="auth-btn" [disabled]="loading()" (click)="submit()">
+      {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+    </button>
+
+    <p class="auth-footer">
+      ¿No tienes cuenta? <a routerLink="/register" class="auth-link">Regístrate gratis</a>
+    </p>
+  </div>
+</div>

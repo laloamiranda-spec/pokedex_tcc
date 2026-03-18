@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, OnInit, signal } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { StorageService } from '../../services/storage';
 import { SupabaseService } from '../../services/supabase';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-header',
@@ -9,21 +10,38 @@ import { SupabaseService } from '../../services/supabase';
   templateUrl: './header.html',
   styleUrl: './header.scss',
 })
-export class HeaderComponent {
+export class HeaderComponent implements OnInit {
   syncing = signal(false);
-  syncMsg = signal('');
 
-  constructor(public sb: SupabaseService, private storage: StorageService) {}
+  constructor(
+    public sb: SupabaseService,
+    private storage: StorageService,
+    public auth: AuthService,
+    private router: Router
+  ) {}
 
-  get statusIcon(): string {
+  ngOnInit(): void {
+    this.sync();
+  }
+
+  get statusDot(): string {
+    if (this.syncing()) return 'dot-syncing';
     const s = this.sb.status();
-    return s === 'ok' ? '🟢' : s === 'err' ? '🔴' : '⚫';
+    return s === 'ok' ? 'dot-ok' : s === 'err' ? 'dot-err' : 'dot-idle';
+  }
+
+  get userEmail(): string {
+    return this.auth.currentUser()?.email ?? '';
+  }
+
+  async logout(): Promise<void> {
+    await this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
   async sync(): Promise<void> {
     if (!this.sb.configured) return;
     this.syncing.set(true);
-    this.syncMsg.set('');
     try {
       const [rpds, vhs, expos, ecs, rxs] = await Promise.all([
         this.sb.fetchAll('rpd_records'), this.sb.fetchAll('vh_records'),
@@ -51,13 +69,10 @@ export class HeaderComponent {
         })),
         rxs: rxs?.map((r: any) => ({ ...r, type: 'rx' }))
       });
-      const total = (rpds?.length||0)+(vhs?.length||0)+(expos?.length||0)+(ecs?.length||0)+(rxs?.length||0);
-      this.syncMsg.set(`✅ ${total} registros`);
     } catch {
-      this.syncMsg.set('❌ Error');
+      // sync silencioso — el dot-err indica el problema
     } finally {
       this.syncing.set(false);
-      setTimeout(() => this.syncMsg.set(''), 3000);
     }
   }
 }

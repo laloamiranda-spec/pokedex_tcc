@@ -1,3 +1,7 @@
-<app-header></app-header>
+@if (auth.currentUser()) {
+  <app-header></app-header>
+}
 <router-outlet></router-outlet>
-<app-bottom-nav></app-bottom-nav>
+@if (auth.currentUser()) {
+  <app-bottom-nav></app-bottom-nav>
+}

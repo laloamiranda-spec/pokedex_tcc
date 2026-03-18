@@ -5,21 +5,21 @@
       <div class="logo-text">POKEDEX<span class="logo-sub">Terapia Cognitivo Conductual</span></div>
     </div>
     <nav class="nav-tabs">
-      <a class="nav-tab tab-home" routerLink="/welcome" routerLinkActive="active">🏠 Inicio</a>
-      <a class="nav-tab tab-rpd" routerLink="/rpd" routerLinkActive="active">🧠 RPD</a>
-      <a class="nav-tab tab-verify" routerLink="/verify" routerLinkActive="active">🔎 VH</a>
-      <a class="nav-tab tab-expo" routerLink="/expo" routerLinkActive="active">🪜 Exposición</a>
-      <a class="nav-tab tab-expo" routerLink="/ec" routerLinkActive="active">🔬 Exp. Conductual</a>
-      <a class="nav-tab tab-relax" routerLink="/relax" routerLinkActive="active">🫁 Calma</a>
+      <a class="nav-tab tab-home"    routerLink="/welcome" routerLinkActive="active">🏠 Inicio</a>
+      <a class="nav-tab tab-rpd"     routerLink="/rpd"     routerLinkActive="active">🧠 RPD</a>
+      <a class="nav-tab tab-verify"  routerLink="/verify"  routerLinkActive="active">🔎 VH</a>
+      <a class="nav-tab tab-expo"    routerLink="/expo"    routerLinkActive="active">🪜 Exposición</a>
+      <a class="nav-tab tab-expo"    routerLink="/ec"      routerLinkActive="active">🔬 Exp. Conductual</a>
+      <a class="nav-tab tab-relax"   routerLink="/relax"   routerLinkActive="active">🫁 Calma</a>
       <a class="nav-tab tab-history" routerLink="/history" routerLinkActive="active">📋 Registros</a>
     </nav>
     <div class="header-right">
       @if (sb.configured) {
-        <button class="sb-btn" [disabled]="syncing()" (click)="sync()">
-          {{ syncing() ? '⏳' : statusIcon }} {{ syncMsg() || 'Sync' }}
-        </button>
+        <span class="sync-dot" [class]="statusDot"
+          [title]="syncing() ? 'Sincronizando…' : sb.status() === 'ok' ? 'Sincronizado' : sb.status() === 'err' ? 'Error de conexión' : 'Sin conexión'"></span>
       }
-      <a class="btn-primary" routerLink="/rpd">＋ Nuevo RPD</a>
+      <span class="header-user-email" [title]="userEmail">{{ userEmail }}</span>
+      <button class="btn-logout" (click)="logout()" title="Cerrar sesión">Salir</button>
     </div>
   </div>
 </header>

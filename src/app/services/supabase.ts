@@ -8,17 +8,14 @@ export class SupabaseService {
   status = signal<SbStatus>('idle');
   private url = '';
   private key = '';
+  private userToken: string | null = null;
+  private userId:   string | null = null;
 
   constructor() { this.loadCreds(); }
 
   private loadCreds(): void {
-    // Prioridad: environment → localStorage (configuración manual)
-    this.url = environment.supabase.url
-      || localStorage.getItem('sb_url')
-      || '';
-    this.key = environment.supabase.anonKey
-      || localStorage.getItem('sb_key')
-      || '';
+    this.url = environment.supabase.url || localStorage.getItem('sb_url') || '';
+    this.key = environment.supabase.anonKey || localStorage.getItem('sb_key') || '';
     this.status.set(this.url && this.key ? 'ok' : 'idle');
   }
 
@@ -30,10 +27,15 @@ export class SupabaseService {
     this.status.set(this.url && this.key ? 'ok' : 'idle');
   }
 
+  /** Llamado por AuthService tras login/logout */
+  setUserContext(token: string | null, userId: string | null): void {
+    this.userToken = token;
+    this.userId    = userId;
+  }
+
   get configured(): boolean { return !!(this.url && this.key); }
-  get currentUrl(): string { return this.url; }
-  get currentKey(): string { return this.key; }
-  /** True si las credenciales vienen del environment (no editables en UI) */
+  get currentUrl(): string  { return this.url; }
+  get currentKey(): string  { return this.key; }
   get fromEnvironment(): boolean {
     return !!(environment.supabase.url && environment.supabase.anonKey);
   }
@@ -42,7 +44,7 @@ export class SupabaseService {
     return {
       'Content-Type': 'application/json',
       'apikey': this.key,
-      'Authorization': `Bearer ${this.key}`,
+      'Authorization': `Bearer ${this.userToken || this.key}`,
       'Prefer': 'return=minimal'
     };
   }
@@ -51,30 +53,32 @@ export class SupabaseService {
     if (!this.configured) return false;
     try {
       const res = await fetch(`${this.url}/rest/v1/rpd_records?limit=1`,
-        { headers: { 'apikey': this.key, 'Authorization': `Bearer ${this.key}` } });
-      const ok = res.ok;
-      this.status.set(ok ? 'ok' : 'err');
-      return ok;
-    } catch {
-      this.status.set('err');
-      return false;
-    }
+        { headers: { 'apikey': this.key, 'Authorization': `Bearer ${this.userToken || this.key}` } });
+      this.status.set(res.ok ? 'ok' : 'err');
+      return res.ok;
+    } catch { this.status.set('err'); return false; }
   }
 
   async insert(table: string, data: object): Promise<void> {
     if (!this.configured) return;
+    // Agrega user_id automáticamente cuando hay sesión activa
+    const payload = this.userId ? { ...data, user_id: this.userId } : data;
     try {
       const res = await fetch(`${this.url}/rest/v1/${table}`,
-        { method: 'POST', headers: this.headers(), body: JSON.stringify(data) });
+        { method: 'POST', headers: this.headers(), body: JSON.stringify(payload) });
       this.status.set(res.ok ? 'ok' : 'err');
     } catch { this.status.set('err'); }
   }
 
   async fetchAll(table: string): Promise<any[] | null> {
     if (!this.configured) return null;
+    // Filtra por user_id cuando hay sesión activa (requiere RLS o columna user_id)
+    const filter = this.userId
+      ? `?user_id=eq.${this.userId}&order=id.desc&limit=500`
+      : '?order=id.desc&limit=500';
     try {
-      const res = await fetch(`${this.url}/rest/v1/${table}?order=id.desc&limit=500`,
-        { headers: { 'apikey': this.key, 'Authorization': `Bearer ${this.key}` } });
+      const res = await fetch(`${this.url}/rest/v1/${table}${filter}`,
+        { headers: { 'apikey': this.key, 'Authorization': `Bearer ${this.userToken || this.key}` } });
       return res.ok ? await res.json() : null;
     } catch { return null; }
   }
