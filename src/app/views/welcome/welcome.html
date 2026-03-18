@@ -21,6 +21,37 @@
 </div>
 
 <div class="main">
+
+  <!-- ── ¿Cómo te sientes? ── -->
+  <div class="mood-card">
+    <div class="mood-card-header">
+      <span class="mood-card-title">¿Cómo te sientes hoy?</span>
+      <span class="mood-card-hint">Selecciona y te sugiero un ejercicio</span>
+    </div>
+
+    <div class="mood-grid">
+      @for (m of moods; track m.id) {
+        <button class="mood-chip" [class.selected]="selectedMood() === m.id" (click)="selectMood(m.id)">
+          <span class="mood-chip-emoji">{{ m.emoji }}</span>
+          <span class="mood-chip-label">{{ m.label }}</span>
+        </button>
+      }
+    </div>
+
+    @if (suggestion; as s) {
+      <div class="mood-suggestion" [class]="'mood-suggestion mood-suggestion-' + s.color" style="animation:panelIn .3s ease">
+        <div class="mood-suggestion-icon">{{ s.emoji }}</div>
+        <div class="mood-suggestion-body">
+          <div class="mood-suggestion-title">{{ s.title }}</div>
+          <p class="mood-suggestion-text">{{ s.body }}</p>
+          <button class="mood-suggestion-btn" [class]="'mood-suggestion-btn mood-btn-' + s.color" (click)="goToSuggestion()">
+            {{ s.btnText }}
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+
   <div class="home-cards">
     <div class="tool-card rpd" routerLink="/rpd">
       <span class="tool-card-icon">🧠</span>

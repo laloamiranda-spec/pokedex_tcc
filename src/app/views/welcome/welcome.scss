@@ -1,0 +1,109 @@
+/* ── Mood check-in card ──────────────────────────────────────────── */
+.mood-card {
+  background: var(--surface);
+  border: 1px solid rgba(200,190,178,.35);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.mood-card-header {
+  display: flex; align-items: baseline; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 1.1rem;
+}
+.mood-card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem; color: var(--ink); letter-spacing: -.02em;
+}
+.mood-card-hint {
+  font-size: 12px; color: var(--stone); font-weight: 300;
+}
+
+/* ── Mood chips ── */
+.mood-grid {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: .25rem;
+}
+
+.mood-chip {
+  display: flex; align-items: center; gap: 7px;
+  padding: 8px 14px;
+  background: var(--canvas-alt);
+  border: 1.5px solid rgba(200,190,178,.5);
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body); font-size: 13px; font-weight: 400;
+  color: var(--ink-mid); cursor: pointer;
+  transition: all .2s cubic-bezier(.2,0,.2,1);
+}
+.mood-chip:hover {
+  border-color: var(--stone);
+  background: var(--surface);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+.mood-chip.selected {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: white;
+  box-shadow: 0 3px 12px rgba(42,36,32,.2);
+}
+
+.mood-chip-emoji { font-size: 16px; line-height: 1; }
+.mood-chip-label { white-space: nowrap; }
+
+/* ── Suggestion card ── */
+.mood-suggestion {
+  display: flex; gap: 1rem; align-items: flex-start;
+  margin-top: 1.25rem; padding: 1.1rem 1.25rem;
+  border-radius: var(--radius);
+  border: 1.5px solid transparent;
+}
+
+.mood-suggestion-sage     { background: var(--sage-pale);     border-color: var(--sage-light); }
+.mood-suggestion-teal     { background: var(--teal-pale);     border-color: var(--teal-light); }
+.mood-suggestion-lavender { background: var(--lavender-pale); border-color: var(--lavender-light); }
+.mood-suggestion-gold     { background: var(--gold-pale);     border-color: var(--gold-light); }
+.mood-suggestion-clay     { background: var(--clay-pale);     border-color: var(--clay-light); }
+
+.mood-suggestion-icon {
+  font-size: 2rem; flex-shrink: 0; line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,.1));
+}
+
+.mood-suggestion-body { flex: 1; min-width: 0; }
+
+.mood-suggestion-title {
+  font-family: var(--font-display);
+  font-size: 1rem; color: var(--ink);
+  margin-bottom: 5px; letter-spacing: -.01em;
+}
+
+.mood-suggestion-text {
+  font-size: 13px; color: var(--ink-mid);
+  font-weight: 300; line-height: 1.65;
+  margin-bottom: .9rem;
+}
+
+.mood-suggestion-btn {
+  display: inline-flex; align-items: center;
+  padding: 9px 20px; border: none;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-body); font-size: 13px; font-weight: 500;
+  color: white; cursor: pointer;
+  transition: all .2s; box-shadow: 0 2px 10px rgba(0,0,0,.15);
+}
+.mood-suggestion-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 18px rgba(0,0,0,.2); }
+
+.mood-btn-sage     { background: linear-gradient(135deg, var(--sage),     var(--sage-deep)); }
+.mood-btn-teal     { background: linear-gradient(135deg, var(--teal),     #3A7880); }
+.mood-btn-lavender { background: linear-gradient(135deg, var(--lavender), #6A5EA8); }
+.mood-btn-gold     { background: linear-gradient(135deg, var(--gold-mid), var(--gold)); }
+.mood-btn-clay     { background: linear-gradient(135deg, var(--clay),     #A45E4C); }
+
+@media (max-width: 480px) {
+  .mood-grid { gap: 6px; }
+  .mood-chip { padding: 7px 12px; font-size: 12.5px; }
+  .mood-suggestion { flex-direction: column; gap: .75rem; }
+  .mood-suggestion-icon { font-size: 1.6rem; }
+}
